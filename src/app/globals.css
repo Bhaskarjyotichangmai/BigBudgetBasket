@@ -36,19 +36,22 @@ font-family: 'Poppins', sans-serif;
 }
 .horizontal-boxes {
   display: flex;
-  overflow-x: auto;
+  overflow-x:visible;
   font-family: 'Poppins', sans-serif;
-  padding: 10px;
-  gap: 10px;
+  padding: 5px;
+  gap: 5px;
+  
 }
 
 .box {
-  flex: 0 0 auto;
+  flex: 1 1 auto;
   background-color: #d17e25; 
   padding: 10px;
   border-radius: 1px; 
   font-family: 'Poppins', sans-serif;
   white-space: nowrap;
-  overflow: hidden;
+  overflow:hidden;
   text-overflow: ellipsis;
+  font-size:1.5vw;
 }
+
