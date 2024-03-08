@@ -1,10 +1,9 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState,useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 
 import menulogo from './../../Assets/menu.png'
-import logo from './../../Assets/finallogo.png'
 import { IoClose } from "react-icons/io5";
 import home from '../../Assets/home.png'
 import information from '../../Assets/information.png'
@@ -12,13 +11,29 @@ import telephone from '../../Assets/telephone.png'
 import clsx from 'clsx'
 import settings from '../../Assets/settings.png'
 import usericon from '../../Assets/user.png'
-
+import SignupPage from '@/app/signup/page'
 
 
 
 function Navbar() {
     const[isSideMenuOpen,setMenu]= useState(false);
+    const [userEmail, setUserEmail] = useState('');
     
+    useEffect(() => {
+        const storedEmail = localStorage.getItem('email');
+        const storedUsername=localStorage.getItem('username');
+        if (storedEmail) {
+            setUserEmail(storedEmail);
+        }
+        
+    }, []);
+    
+    const handleLogout = () => {
+        localStorage.removeItem('email');
+        setUserEmail('');
+    };
+
+
     const navLinks=[
         {
             label:'Home',
@@ -55,15 +70,14 @@ function Navbar() {
         <nav className='navbar flex justify-between px-8 items-center py-6 bg-blue-500'>
           <div className='flex items-center gap-8 justify-between'>
       <section className='flex items-center gap-4 '>
-        {/* menu */}
+        
         <Image src={menulogo} onClick={()=>setMenu(true)} alt='menu' width={24} height={24} className='text-3x1 cursor-pointer'/>
-          {/* logo */}
+          
         
             <div className='text-xl text-white bg-opacity-80 font-bold cursor-pointer rounded-full'>
                 TheFreshEats
             </div>
         
-       
       </section>
       {navLinks.map((d,i)=>(
          <Link key={i} href={d.href} className='hidden lg:block text-gray-600 hover:text-black'>
@@ -77,10 +91,19 @@ function Navbar() {
           </Link>
          ))}                     
       </div>
+      
+      {userEmail ? (
+            <div className='flex items-center flex-col lg:flex-row lg:items-center font-bold text-xs'>
+               <span className='mb-2 lg:mb-0 lg:mr-4'>Welcome,{userEmail}</span>
+                <button onClick={handleLogout} className='text-sm font-bold bg-gray-300 rounded-sm'>
+                    Logout
+                </button>
+                </div>
+            ) : (
       <Link href={'/'}>
       <button className='text-sm font-bold bg-gray-300 rounded-sm'>Login/Signup</button>
       </Link>
-        
+            )}
 
       {/* {sidebar mobile menu} */}
       <div className={clsx(
@@ -112,7 +135,7 @@ function Navbar() {
               </div>
               {e.label}
           </Link>
-         ))}        
+         ))}       
          </div>         
           </section>
       </div>

@@ -1,11 +1,11 @@
 "use client";
 import Link from "next/link";
-import React, {useEffect} from "react";
+import React, {useEffect,useState} from "react";
 import {useRouter} from "next/navigation";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { TextField,ThemeProvider, createTheme } from "@mui/material";
-
+import SignupPage from "../signup/page";
 
 const theme = createTheme({
     palette: {
@@ -27,12 +27,22 @@ export default function LoginPage() {
 
     const [user, setUser] = React.useState({
         email: "",
-        password: "",
-       
+        password: "",   
     })
     const [buttonDisabled, setButtonDisabled] = React.useState(false);
     const [loading, setLoading] = React.useState(false);
+    
+    useEffect(() => {
+        const storedEmail = localStorage.getItem("email");
+        const storedPassword = localStorage.getItem("password");
 
+        if (storedEmail && storedPassword) {
+            setUser({
+                email: storedEmail,
+                password: storedPassword,
+            });
+        }
+    }, []);
 
     const onLogin = async (formData:any) => {
         try {
