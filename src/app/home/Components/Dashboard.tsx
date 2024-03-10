@@ -189,16 +189,16 @@ const snacksStoreItems = [
         ))}
       </div>
       <h1 className='text-2xl'>Fruits and Vegetables</h1>
-      <div className="fruits-vegetables-grid grid grid-cols-4 gap-4">
+      <div className="fruits-vegetables-grid grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 lg:mb-8">
         {fruitsAndVegetablesItems.map(item => (
-          <div key={item.id} className="fruits-vegetables-item">
+          <div key={item.id} className="fruits-vegetables-item mb-2 flex flex-col items-center">
             <Image
               src={item.image}
               alt={item.name}
-              width={200}
+              width={400}
               height={200}
             />
-             <Button className='justify-center flex text-xl' variant="contained" color="primary"style={{backgroundColor:'#d17e25'}} onClick={() => handleAddToCart(item.id)}>{item.buttonText}</Button>
+             <Button className='px-4 py-2 md:px-6 md:py-3 lg:px-8 lg:py-4 text-sm md:text-base lg:text-lg w-full h-16 mt-4' variant="contained" color="primary"style={{backgroundColor:'#d17e25'}} onClick={() => handleAddToCart(item.id)}>{item.buttonText}</Button>
           </div>
         ))}
       </div>
@@ -214,20 +214,20 @@ const snacksStoreItems = [
         )}
       </div>
       <h1 className='text-2xl'>Your daily staples</h1>
-      <div className="daily-staples-grid grid grid-cols-5 gap-4 mb-8">
+      <div className="daily-staples-grid grid grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8 lg:mb-8">
         {dailyStaples.map(item => (
-          <div key={item.id} className="daily-staples-item ">
+          <div key={item.id} className="daily-staples-item mb-4 flex flex-col items-center">
             <Image
               src={item.image}
               alt={item.name}
               className='object-cover w-full h-full p-2'
             />
-             <Button className='justify-center flex mt-2 p-2 mb-2 text-xs w-full' variant='contained' color="primary"style={{backgroundColor:'#d17e25'}} onClick={() => handleAddToCart(item.id)}>{item.buttonText}</Button>
+             <Button className='justify-center flex mt-2 p-2 text-xs w-full' variant='contained' color="primary"style={{backgroundColor:'#d17e25'}} onClick={() => handleAddToCart(item.id)}>{item.buttonText}</Button>
           </div>
         ))}
       </div>
       <h1 className='text-2xl'>Snacks store</h1>
-      <div className='sweets-grid grid grid-cols-4 gap-4 mb-8'>
+      <div className='sweets-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 lg:mb-16'>
         {snacksStoreItems.map(item=>(
             <div key={item.id}className='snackstoreitems'>
                 <Image
@@ -235,7 +235,7 @@ const snacksStoreItems = [
                 alt={item.name}
                 className='object-cover w-full h-full p-2'
                 />
-                <Button className='px-4 py-2 md:px-6 md:py-3 lg:px-8 lg:py-4 text-base md:text-lg lg:text-xl w-full md:w-auto' variant='contained' color="primary"style={{backgroundColor:'#d17e25'}} onClick={() => handleAddToCart(item.id)}>{item.buttonText}</Button>
+                <Button className='px-4 py-2 md:px-6 md:py-3 lg:px-8 lg:py-4 text-sm md:text-base lg:text-lg w-full lg:w-full md:w-auto' variant='contained' color="primary"style={{backgroundColor:'#d17e25'}} onClick={() => handleAddToCart(item.id)}>{item.buttonText}</Button>
             </div>
         ))}
       </div>
