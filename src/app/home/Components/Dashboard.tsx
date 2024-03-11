@@ -32,17 +32,20 @@ import item19 from '../../Assets/image 31.png'
 import item20 from '../../Assets/image 32.png'
 import item21 from '../../Assets/image 33.png'
 
-
 export default function Dashboard() {
 
   function handleSearch() {
     console.log('Searching...')
  }
+
+
+ const [addedItems, setAddedItems] = useState<number[]>([]);
+
  const [basketItems, setBasketItems] = useState([
-  { id: 1, name: 'About item', quantity: 1,price:10},
-  { id: 2, name: 'About item', quantity: 1,price:15},
-  { id: 3, name: 'About item', quantity: 1,price:80},
-  { id: 4, name: 'About item', quantity: 1,price:60}
+  { id: 1, name: '', quantity: 1,price:50},
+  { id: 2, name: '', quantity: 1,price:15},
+  { id: 3, name: '', quantity: 1,price:80},
+  { id: 4, name: '', quantity: 1,price:60}
 ]);
 function handleQuantityChange(itemId:number, event:React.ChangeEvent<{value:unknown}>) {
   const updatedBasketItems = basketItems.map(item => {
@@ -68,9 +71,6 @@ function handleQuantityChange(itemId:number, event:React.ChangeEvent<{value:unkn
   { id: 1, name: 'Item 1',  image:image,imagee:imagee},
 ];
 
- const handleAddToCart=(itemId:number)=>{
-    console.log(`Item ${itemId} added to cart`,basketItems)
- }
 const popularItems=[
        { id:1,name:'Popularitem1',image:item5},
        { id:2,name:'Popularitem2',image:item6},
@@ -98,6 +98,11 @@ const snacksStoreItems = [
     { id: 3, name: 'itemm10', image: item20,buttonText:'Pasta sauces and more'},
     { id: 4, name: 'itemm11', image: item21,buttonText:'Sweet cravings' }
   ];
+  const handleAddToCart = (itemId: number) => {
+    if (!addedItems.includes(itemId)) {
+        setAddedItems([...addedItems, itemId]);
+    }
+};
 
   return (
  <div>
@@ -152,8 +157,9 @@ const snacksStoreItems = [
                         <Image
                         src={basketItem.id===1?item1: basketItem.id === 2 ? item2 : basketItem.id === 3 ? item3 : item4}
                         alt={`Item ${basketItem.id}`}
-                                width={100}
+                                width={250}
                                 height={100}
+                                className='object-cover w-full'
                         />
                         <p>{basketItem.name}</p>
                         <p>Price:Rs. {basketItem.price}</p>
@@ -169,7 +175,15 @@ const snacksStoreItems = [
                                     <MenuItem key={quantity} value={quantity}>{quantity}kg</MenuItem>
                                 ))}
                             </Select>
-                            <Button variant="contained"style={{backgroundColor:'#d17e25'}} color="primary" onClick={() => handleAddToCart(basketItem.id)}>Add</Button>
+                            {addedItems.includes(basketItem.id) ? (
+                                    <Button className="mb-4 text-xs md:text-base lg:text-lg" variant="contained" style={{ backgroundColor: '#d17e25' }} color="primary" disabled>
+                                        Added to cart
+                                    </Button>
+                                ) : (
+                                    <Button className="mb-4 text-xs md:text-base lg:text-lg" variant="contained" style={{ backgroundColor: '#d17e25' }} color="primary" onClick={() => handleAddToCart(basketItem.id)}>
+                                        Add to cart
+                                    </Button>
+                                )}
                         </FormControl>
                     </div>
                 ))}

@@ -63,7 +63,7 @@ function Navbar() {
       },
       {
           label: 'User',
-          href: '',
+          href: '/',
           icon: usericon,
       }
   ];
