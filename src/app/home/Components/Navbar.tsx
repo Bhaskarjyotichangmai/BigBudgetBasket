@@ -12,12 +12,13 @@ import clsx from 'clsx'
 import settings from '../../Assets/settings.png'
 import usericon from '../../Assets/user.png'
 import SignupPage from '@/app/signup/page'
-
+import { Avatar } from '@mui/material'
 
 
 function Navbar() {
     const[isSideMenuOpen,setMenu]= useState(false);
     const [userEmail, setUserEmail] = useState('');
+    const [isLogoutVisible, setLogoutVisible] = useState(false);
     
     useEffect(() => {
         const storedEmail = localStorage.getItem('email');
@@ -32,7 +33,9 @@ function Navbar() {
         localStorage.removeItem('email');
         setUserEmail('');
     };
-
+    const handleAvatarClick = () => {
+        setLogoutVisible(!isLogoutVisible);
+    };
 
     const navLinks=[
         {
@@ -60,7 +63,7 @@ function Navbar() {
       },
       {
           label: 'User',
-          href: '#',
+          href: '/',
           icon: usericon,
       }
   ];
@@ -93,18 +96,34 @@ function Navbar() {
       </div>
       
       {userEmail ? (
-            <div className='flex items-center flex-col lg:flex-row lg:items-center font-bold text-xs'>
+            <div className='flex items-center flex-col lg:flex-row lg:items-center font-bold text-xs relative'>
                <span className='mb-2 lg:mb-0 lg:mr-4'>Welcome,{userEmail}</span>
-                <button onClick={handleLogout} className='text-sm font-bold bg-gray-300 rounded-sm'>
+               <div className='relative'>
+               <Avatar alt="User Avatar" className='cursor-pointer' src="/static/images/avatar/1.jpg"onClick={handleAvatarClick} />
+               {isLogoutVisible&&(
+                <div className="absolute top-full left-0 bg-black p-2 rounded-md shadow-md z-20">
+                <button onClick={handleLogout} className='text-sm font-bold bg-gray-300 rounded-sm mb-1 px-1'>
                     Logout
                 </button>
+                <button className='text-sm font-bold bg-gray-300 rounded-sm mb-1 px-1 w-full'>
+                    item1
+                </button>
+                <button className='text-sm font-bold bg-gray-300 rounded-sm mb-1 px-1 w-full'>
+                    item2
+                </button>
+                <button className='text-sm font-bold bg-gray-300 rounded-sm px-1 w-full'>
+                    item3
+                </button>
+                </div>
+               )}
+                </div>
                 </div>
             ) : (
       <Link href={'/'}>
       <button className='text-sm font-bold bg-gray-300 rounded-sm'>Login/Signup</button>
       </Link>
             )}
-
+     
       {/* {sidebar mobile menu} */}
       <div className={clsx(
         "fixed h-full w-screen lg-hidden bg-black/50 backdrop-blur-sm top-0 right-0 -translate-x-full transition-all",

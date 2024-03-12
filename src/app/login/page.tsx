@@ -47,7 +47,7 @@ export default function LoginPage() {
     const onLogin = async (formData:any) => {
         try {
             setLoading(true);
-            if(!formData.email||!formData.email.length){
+            if(!user.email||!user.email.length){
                 console.log('Email is empty');
                 setEmailError('Email is required');
                 
@@ -55,18 +55,31 @@ export default function LoginPage() {
                 setEmailError('');
             }
             
-            if(!formData.password||!formData.password.length){
+            if(!user.password||!user.password.length){
                 console.log('Password is empty')
                 setPasswordError('Password is required');
                 
             }else{
                 setPasswordError('')
             }
-            return true;
-            const response = await axios.post("/api/users/login", user);
-            console.log("Login success", response.data);
-            toast.success("Login success");
-            router.push("/profile");
+            const storedEmail = localStorage.getItem("email");
+            const storedPassword = localStorage.getItem("password");
+            // return true;
+            // const response = await axios.post("/api/users/login", user);
+            // console.log("Login success", response.data);
+            // toast.success("Login success");
+            // router.push("/profile");
+            if (
+                storedEmail === user.email &&
+                storedPassword === user.password
+              ) {
+                console.log("Login success");
+                toast.success("Login success");
+                router.push("/home");
+              } else {
+                console.log("Invalid email or password");
+                toast.error("Invalid email or password");
+              }
         } catch (error:any) {
             console.log("Login failed", error.message);
             toast.error(error.message);

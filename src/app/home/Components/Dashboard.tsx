@@ -32,17 +32,20 @@ import item19 from '../../Assets/image 31.png'
 import item20 from '../../Assets/image 32.png'
 import item21 from '../../Assets/image 33.png'
 
-
 export default function Dashboard() {
 
   function handleSearch() {
     console.log('Searching...')
  }
+
+
+ const [addedItems, setAddedItems] = useState<number[]>([]);
+
  const [basketItems, setBasketItems] = useState([
-  { id: 1, name: 'About item', quantity: 1,price:10},
-  { id: 2, name: 'About item', quantity: 1,price:15},
-  { id: 3, name: 'About item', quantity: 1,price:80},
-  { id: 4, name: 'About item', quantity: 1,price:60}
+  { id: 1, name: '', quantity: 1,price:50},
+  { id: 2, name: '', quantity: 1,price:15},
+  { id: 3, name: '', quantity: 1,price:80},
+  { id: 4, name: '', quantity: 1,price:60}
 ]);
 function handleQuantityChange(itemId:number, event:React.ChangeEvent<{value:unknown}>) {
   const updatedBasketItems = basketItems.map(item => {
@@ -68,9 +71,6 @@ function handleQuantityChange(itemId:number, event:React.ChangeEvent<{value:unkn
   { id: 1, name: 'Item 1',  image:image,imagee:imagee},
 ];
 
- const handleAddToCart=(itemId:number)=>{
-    console.log(`Item ${itemId} added to cart`,basketItems)
- }
 const popularItems=[
        { id:1,name:'Popularitem1',image:item5},
        { id:2,name:'Popularitem2',image:item6},
@@ -98,6 +98,11 @@ const snacksStoreItems = [
     { id: 3, name: 'itemm10', image: item20,buttonText:'Pasta sauces and more'},
     { id: 4, name: 'itemm11', image: item21,buttonText:'Sweet cravings' }
   ];
+  const handleAddToCart = (itemId: number) => {
+    if (!addedItems.includes(itemId)) {
+        setAddedItems([...addedItems, itemId]);
+    }
+};
 
   return (
  <div>
@@ -152,8 +157,9 @@ const snacksStoreItems = [
                         <Image
                         src={basketItem.id===1?item1: basketItem.id === 2 ? item2 : basketItem.id === 3 ? item3 : item4}
                         alt={`Item ${basketItem.id}`}
-                                width={100}
+                                width={250}
                                 height={100}
+                                className='object-cover w-full'
                         />
                         <p>{basketItem.name}</p>
                         <p>Price:Rs. {basketItem.price}</p>
@@ -169,7 +175,15 @@ const snacksStoreItems = [
                                     <MenuItem key={quantity} value={quantity}>{quantity}kg</MenuItem>
                                 ))}
                             </Select>
-                            <Button variant="contained"style={{backgroundColor:'#d17e25'}} color="primary" onClick={() => handleAddToCart(basketItem.id)}>Add</Button>
+                            {addedItems.includes(basketItem.id) ? (
+                                    <Button className="mb-4 text-xs md:text-base lg:text-lg" variant="contained" style={{ backgroundColor: '#d17e25' }} color="primary" disabled>
+                                        Added to cart
+                                    </Button>
+                                ) : (
+                                    <Button className="mb-4 text-xs md:text-base lg:text-lg" variant="contained" style={{ backgroundColor: '#d17e25' }} color="primary" onClick={() => handleAddToCart(basketItem.id)}>
+                                        Add to cart
+                                    </Button>
+                                )}
                         </FormControl>
                     </div>
                 ))}
@@ -189,16 +203,16 @@ const snacksStoreItems = [
         ))}
       </div>
       <h1 className='text-2xl'>Fruits and Vegetables</h1>
-      <div className="fruits-vegetables-grid grid grid-cols-4 gap-4">
+      <div className="fruits-vegetables-grid grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 lg:mb-8">
         {fruitsAndVegetablesItems.map(item => (
-          <div key={item.id} className="fruits-vegetables-item">
+          <div key={item.id} className="fruits-vegetables-item mb-2 flex flex-col items-center">
             <Image
               src={item.image}
               alt={item.name}
-              width={200}
+              width={400}
               height={200}
             />
-             <Button className='justify-center flex text-xl' variant="contained" color="primary"style={{backgroundColor:'#d17e25'}} onClick={() => handleAddToCart(item.id)}>{item.buttonText}</Button>
+             <Button className='px-4 py-2 md:px-6 md:py-3 lg:px-8 lg:py-4 text-sm md:text-base lg:text-lg w-full h-16 mt-4' variant="contained" color="primary"style={{backgroundColor:'#d17e25'}} onClick={() => handleAddToCart(item.id)}>{item.buttonText}</Button>
           </div>
         ))}
       </div>
@@ -214,20 +228,20 @@ const snacksStoreItems = [
         )}
       </div>
       <h1 className='text-2xl'>Your daily staples</h1>
-      <div className="daily-staples-grid grid grid-cols-5 gap-4 mb-8">
+      <div className="daily-staples-grid grid grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8 lg:mb-8">
         {dailyStaples.map(item => (
-          <div key={item.id} className="daily-staples-item ">
+          <div key={item.id} className="daily-staples-item mb-4 flex flex-col items-center">
             <Image
               src={item.image}
               alt={item.name}
               className='object-cover w-full h-full p-2'
             />
-             <Button className='justify-center flex mt-2 p-2 mb-2 text-xs w-full' variant='contained' color="primary"style={{backgroundColor:'#d17e25'}} onClick={() => handleAddToCart(item.id)}>{item.buttonText}</Button>
+             <Button className='justify-center flex mt-2 p-2 text-xs w-full' variant='contained' color="primary"style={{backgroundColor:'#d17e25'}} onClick={() => handleAddToCart(item.id)}>{item.buttonText}</Button>
           </div>
         ))}
       </div>
       <h1 className='text-2xl'>Snacks store</h1>
-      <div className='sweets-grid grid grid-cols-4 gap-4 mb-8'>
+      <div className='sweets-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 lg:mb-16'>
         {snacksStoreItems.map(item=>(
             <div key={item.id}className='snackstoreitems'>
                 <Image
@@ -235,7 +249,7 @@ const snacksStoreItems = [
                 alt={item.name}
                 className='object-cover w-full h-full p-2'
                 />
-                <Button className='px-4 py-2 md:px-6 md:py-3 lg:px-8 lg:py-4 text-base md:text-lg lg:text-xl w-full md:w-auto' variant='contained' color="primary"style={{backgroundColor:'#d17e25'}} onClick={() => handleAddToCart(item.id)}>{item.buttonText}</Button>
+                <Button className='px-4 py-2 md:px-6 md:py-3 lg:px-8 lg:py-4 text-sm md:text-base lg:text-lg w-full lg:w-full md:w-auto' variant='contained' color="primary"style={{backgroundColor:'#d17e25'}} onClick={() => handleAddToCart(item.id)}>{item.buttonText}</Button>
             </div>
         ))}
       </div>
