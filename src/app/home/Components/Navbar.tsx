@@ -2,7 +2,6 @@
 import React, { useState,useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-
 import menulogo from './../../Assets/menu.png'
 import { IoClose } from "react-icons/io5";
 import home from '../../Assets/home.png'
@@ -13,7 +12,8 @@ import settings from '../../Assets/settings.png'
 import usericon from '../../Assets/user.png'
 import SignupPage from '@/app/signup/page'
 import { Avatar } from '@mui/material'
-
+import Contactus from '../NavLinks/Contactus'
+import { useRouter } from 'next/navigation'
 
 function Navbar() {
     const[isSideMenuOpen,setMenu]= useState(false);
@@ -36,29 +36,30 @@ function Navbar() {
     const handleAvatarClick = () => {
         setLogoutVisible(!isLogoutVisible);
     };
-
+   
+    const router=useRouter();
     const navLinks=[
         {
             label:'Home',
-            href:'#',
+            href:'/Home',
             icon:home,
         },
         {
             label:'Information',
-            href:'#',
+            href:'/Information',
             icon:information,
         },
         {
             label:'Contact us',
-            href:'#',
-            icon:telephone,
+            href:'/Contactus',
+            icon:telephone
         }
 
     ];
     const bottomNavLinks = [
       {
           label: 'Settings',
-          href: '#',
+          href: '../NavLinks/Settings',
           icon: settings,
       },
       {
@@ -67,6 +68,9 @@ function Navbar() {
           icon: usericon,
       }
   ];
+  const handleNavLinkClick=(href:string)=>{
+    router.push(href)
+  }
 
   return (
     <main>
@@ -82,16 +86,19 @@ function Navbar() {
             </div>
         
       </section>
-      {navLinks.map((d,i)=>(
-         <Link key={i} href={d.href} className='hidden lg:block text-gray-600 hover:text-black'>
-             {d.label}
-      </Link>
+      {navLinks.map((link,index)=>(
+    <Link href={link.href} key={index}>
+        <div onClick={() => handleNavLinkClick(link.href)} className='hidden lg:block text-gray-600 hover:text-black'>
+            {link.label}
+        </div>
+</Link>
        ))}
-       {bottomNavLinks.map((e, g) => (
-          <Link key={g} href={e.href} className='hidden lg:block text-gray-600 hover:text-black'>
-              
-              {e.label}
-          </Link>
+       {bottomNavLinks.map((link, index) => (
+        <Link href={link.href} key={index}>
+        <div onClick={() => handleNavLinkClick(link.href)} className='hidden lg:block text-gray-600 hover:text-black'>
+            {link.label}
+        </div>
+</Link>
          ))}                     
       </div>
       
@@ -102,17 +109,17 @@ function Navbar() {
                <Avatar alt="User Avatar" className='cursor-pointer' src="/static/images/avatar/1.jpg"onClick={handleAvatarClick} />
                {isLogoutVisible&&(
                 <div className="absolute top-full left-0 bg-black p-2 rounded-md shadow-md z-20">
-                <button onClick={handleLogout} className='text-sm font-bold bg-gray-300 rounded-sm mb-1 px-1'>
-                    Logout
-                </button>
-                <button className='text-sm font-bold bg-gray-300 rounded-sm mb-1 px-1 w-full'>
+                <button className='text-sm font-bold bg-gray-300 rounded-sm mb-1 px-1 py-2 w-full'>
                     item1
                 </button>
-                <button className='text-sm font-bold bg-gray-300 rounded-sm mb-1 px-1 w-full'>
+                <button className='text-sm font-bold bg-gray-300 rounded-sm mb-1 px-1 py-2 w-full'>
                     item2
                 </button>
-                <button className='text-sm font-bold bg-gray-300 rounded-sm px-1 w-full'>
+                <button className='text-sm font-bold bg-gray-300 rounded-sm mb-1 px-1 py-2 w-full'>
                     item3
+                </button>
+                <button onClick={handleLogout} className='text-sm font-bold bg-gray-300 rounded-sm px-1 py-2 w-full'>
+                    Logout
                 </button>
                 </div>
                )}
