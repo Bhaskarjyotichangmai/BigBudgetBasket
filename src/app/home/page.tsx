@@ -1,20 +1,10 @@
+'use client'
 import React from 'react'
-import Navbar from './Components/Navbar'
-import Dashboard from './Components/Dashboard'
-import Footerlist from './Components/Footerlist'
-import Information from './NavLinks/Information'
-function page() {
+
+function Home() {
   return (
-    <div>
-        <Navbar/>
-        <div>
-          <Dashboard/>
-        </div>
-        <footer >
-        <Footerlist/>
-        </footer>
-    </div>
+    <div>Hi this is Homepage</div>
   )
 }
 
-export default page
+export default Home

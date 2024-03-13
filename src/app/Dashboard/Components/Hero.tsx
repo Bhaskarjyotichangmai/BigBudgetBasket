@@ -51,7 +51,7 @@ function Hero({ item }: HeroProps) {
   };
 
   return (
-    <Grid container className="item-card grid grid-cols-1 lg-grid-cols-1 p-2 justify-center cursor-pointer w-full h-full items-center py-4 lg:w-3/4 lg:mx-auto">
+    <Grid container className="item-card grid grid-cols-1 lg-grid-cols-1 p-2 justify-center cursor-pointer w-full h-full items-center py-4 lg:w-2/4 lg:mx-auto">
     <Slider {...settings} >
         {slidingImages.map(slidingImages => (
             <Grid key={slidingImages.id} item xs='auto' > 
