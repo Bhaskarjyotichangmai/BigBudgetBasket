@@ -13,7 +13,7 @@ import settings from '../../Assets/settings.png'
 import usericon from '../../Assets/user.png'
 import SignupPage from '@/app/signup/page'
 import { Avatar } from '@mui/material'
-
+import { useRouter } from 'next/navigation'
 
 function Navbar() {
     const[isSideMenuOpen,setMenu]= useState(false);
@@ -37,36 +37,42 @@ function Navbar() {
         setLogoutVisible(!isLogoutVisible);
     };
 
+    
+    const router=useRouter();
     const navLinks=[
         {
             label:'Home',
-            href:'#',
+            href:'/Home',
             icon:home,
         },
         {
             label:'Information',
-            href:'#',
+            href:'/Information',
             icon:information,
         },
         {
             label:'Contact us',
-            href:'#',
-            icon:telephone,
+            href:'/Contactus',
+            icon:telephone
         }
 
     ];
     const bottomNavLinks = [
       {
           label: 'Settings',
-          href: '#',
+          href: '/Settings',
           icon: settings,
       },
       {
           label: 'User',
-          href: '/',
+          href: '/User',
           icon: usericon,
       }
   ];
+  const handleNavLinkClick=(href:string)=>{
+    router.push(href)
+  }
+
 
   return (
     <main>
@@ -82,15 +88,18 @@ function Navbar() {
             </div>
         
       </section>
-      {navLinks.map((d,i)=>(
-         <Link key={i} href={d.href} className='hidden lg:block text-gray-600 hover:text-black'>
-             {d.label}
+      {navLinks.map((link,index)=>(
+         <Link key={index} href={link.href} className='hidden lg:block text-gray-600 font-bold hover:text-black'>
+              <div onClick={() => handleNavLinkClick(link.href)}>
+             {link.label}
+             </div>
       </Link>
        ))}
-       {bottomNavLinks.map((e, g) => (
-          <Link key={g} href={e.href} className='hidden lg:block text-gray-600 hover:text-black'>
-              
-              {e.label}
+       {bottomNavLinks.map((link, index) => (
+          <Link key={index} href={link.href} className='hidden lg:block text-gray-600 font-bold hover:text-black'>
+              <div onClick={() => handleNavLinkClick(link.href)}>
+              {link.label}
+              </div>
           </Link>
          ))}                     
       </div>
@@ -126,7 +135,7 @@ function Navbar() {
      
       {/* {sidebar mobile menu} */}
       <div className={clsx(
-        "fixed h-full w-screen lg-hidden bg-black/50 backdrop-blur-sm top-0 right-0 -translate-x-full transition-all",
+        "fixed h-full w-screen lg-hidden bg-black/50 backdrop-blur-sm top-0 right-0 -translate-x-full transition-all z-50",
         isSideMenuOpen && "translate-x-0"
       )}
       >
@@ -137,22 +146,22 @@ function Navbar() {
            className='mt-0 mb-8 text-3xl cursor-pointer'/>
         
         
-         {navLinks.map((d,i)=>(
-         <Link key={i} href={d.href} className='font-bold flex items-center'>
+         {navLinks.map((link,index)=>(
+         <Link key={index} href={link.href} className='font-bold flex items-center'>
          <div className='mr-2'>
-         <Image src={d.icon} alt={d.label} width={24} height={24}/>
+         <Image src={link.icon} alt={link.label} width={24} height={24}/>
              </div>
-             {d.label}
+             {link.label}
       </Link>
        ))}
 
          <div className='mt-auto'>
-         {bottomNavLinks.map((e, g) => (
-          <Link key={g} href={e.href} className=' font-bold flex items-center'>
+         {bottomNavLinks.map((link,index) => (
+          <Link key={index} href={link.href} className=' font-bold flex items-center'>
               <div className='mr-2'>
-                  <Image src={e.icon} alt={e.label} width={24} height={24} />
+                  <Image src={link.icon} alt={link.label} width={24} height={24} />
               </div>
-              {e.label}
+              {link.label}
           </Link>
          ))}       
          </div>         

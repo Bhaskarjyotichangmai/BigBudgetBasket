@@ -65,7 +65,7 @@ export default function SignupPage() {
     if (validateForm()) {
       localStorage.setItem("email", email);
       localStorage.setItem("password", password);
-      router.push("/home");
+      router.push("/Dashboard");
     }
   };
 

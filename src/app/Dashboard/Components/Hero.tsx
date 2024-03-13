@@ -12,6 +12,7 @@ import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import {Box,Grid} from '@mui/material'
 
+
 interface Item {
     id: number;
     name: string;
@@ -42,45 +43,33 @@ function Hero({ item }: HeroProps) {
   const settings = {
     dots: true,
     infinite: true,
-    speed: 400,
+    speed: 200,
     slidesToShow:1,
     slidesToScroll: 1,
+    autoplay:true,
+    autoplaySpeed:1200,
   };
 
   return (
-    // <div className="item-card p-4 flex justify-center cursor-pointer w-full h-full items-center">
-    //     <Slider {...settings}>
-    //     {slidingImages.map(slidingImages => (
-    //        <Box key={slidingImages.id} sx={{ width: "100%", height: "100%" }}>
-    //        <Image
-    //            src={slidingImages.image}
-    //            alt={slidingImages.name}
-    //            width={500}
-    //            height={400}
-    //            layout="responsive"
-    //        />
-    //    </Box>
-    //     ))}
-    //         </Slider>
-    //   </div>
-    <Grid container className="item-card p-4 justify-center cursor-pointer w-full h-full items-center">
-    <Slider {...settings}>
+    <Grid container className="item-card grid grid-cols-1 lg-grid-cols-1 p-2 justify-center cursor-pointer w-full h-full items-center py-4 lg:w-2/4 lg:mx-auto">
+    <Slider {...settings} >
         {slidingImages.map(slidingImages => (
-            <Grid key={slidingImages.id} item xs={12}>
-                <Box sx={{ width: "100%", height: "100%" }}>
+            <Grid key={slidingImages.id} item xs='auto' > 
+                <Box sx={{ width:"100%", height: "100%"}}>
                     <Image
                         src={slidingImages.image}
                         alt={slidingImages.name}
-                        width={400}
-                        height={400}
-                        layout="responsive"
+                        layout='responsive'
+                        objectFit='cover'
+                        className='object-cover'
+                        width={200}
+                        height={100}
                     />
                 </Box>
             </Grid>
         ))}
     </Slider>
     </Grid>
-  
   )
 }
 
