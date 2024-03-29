@@ -178,7 +178,7 @@ const cartItemSchema = new mongoose.Schema({
 const CartItem = mongoose.model('CartItem', cartItemSchema,'cartitems');
 
 
-app.post('/api/addtocart', async (req, res) => {
+app.post('/api/addtocart',verifyToken, async (req, res) => {
     try {
         const token = req.headers.authorization; 
 

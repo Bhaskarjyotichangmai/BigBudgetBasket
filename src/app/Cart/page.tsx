@@ -22,7 +22,10 @@ function page() {
         try {
           const token = localStorage.getItem("token");
             const response = await axios.get<CartItem[]>('http://localhost:5004/api/cart-items', {
-          });
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+              });
             if (response.status === 200) {
                 setCartItems(response.data);
             }
@@ -30,10 +33,14 @@ function page() {
             console.error('Error fetching cart items:', error);
         }
     };
-    const handleDeleteItem = async (itemId: any) => {
+    const handleDeleteItem = async (itemId: number) => {
       try {
           const token = localStorage.getItem("token");
-          await axios.delete(`http://localhost:5004/api/deleteCartItem/${itemId}`);
+          await axios.delete(`http://localhost:5004/api/deleteCartItem/${itemId}`, {
+              headers: {
+                  Authorization: `Bearer ${token}`
+              }
+          });
           fetchCartItems();
       } catch (error) {
           console.error('Error deleting cart item:', error);

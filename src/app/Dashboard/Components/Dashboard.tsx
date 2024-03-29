@@ -104,7 +104,6 @@ const snacksStoreItems = [
   const [buttonColors, setButtonColors] = useState<{ [key: number]: string }>({});
 
 
-
   const handleAddToCart = async (itemId: number) => {
     const itemToAdd = basketItems.find(item => item.id === itemId);
     if (itemToAdd) {
@@ -119,6 +118,7 @@ const snacksStoreItems = [
             }, {
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 }
             });
             if (response.status === 201) { 
