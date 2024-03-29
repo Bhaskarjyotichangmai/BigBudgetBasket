@@ -2,7 +2,7 @@
 import React,{ChangeEvent, ReactNode} from 'react'
 import { TextField,InputAdornment, Box, Button, Select, MenuItem, FormControl, InputLabel, SelectChangeEvent } from '@mui/material'
 import Image from 'next/image'
-import './Hero'
+import axios from 'axios'
 
 import search from '../../Assets/search.png'
 import Hero from './Hero'
@@ -42,10 +42,10 @@ export default function Dashboard() {
  const [addedItems, setAddedItems] = useState<number[]>([]);
 
  const [basketItems, setBasketItems] = useState([
-  { id: 1, name: '', quantity: 1,price:50},
-  { id: 2, name: '', quantity: 1,price:15},
-  { id: 3, name: '', quantity: 1,price:80},
-  { id: 4, name: '', quantity: 1,price:60}
+  { id: 1, name: 'Item1', quantity: 1,price:50},
+  { id: 2, name: 'Item2', quantity: 1,price:15},
+  { id: 3, name: 'Item3', quantity: 1,price:80},
+  { id: 4, name: 'Item4', quantity: 1,price:60}
 ]);
 function handleQuantityChange(itemId:number, event:React.ChangeEvent<{value:unknown}>) {
   const updatedBasketItems = basketItems.map(item => {
@@ -98,9 +98,51 @@ const snacksStoreItems = [
     { id: 3, name: 'itemm10', image: item20,buttonText:'Pasta sauces and more'},
     { id: 4, name: 'itemm11', image: item21,buttonText:'Sweet cravings' }
   ];
-  const handleAddToCart = (itemId: number) => {
-    if (!addedItems.includes(itemId)) {
-        setAddedItems([...addedItems, itemId]);
+
+  const [showNotification, setShowNotification] = useState<boolean>(false);
+  const [notificationItemId, setNotificationItemId] = useState<number | null>(null); // Track which item's button triggered the notification
+  const [buttonColors, setButtonColors] = useState<{ [key: number]: string }>({});
+
+
+
+  const handleAddToCart = async (itemId: number) => {
+    const itemToAdd = basketItems.find(item => item.id === itemId);
+    if (itemToAdd) {
+        try {
+            const token=localStorage.getItem('token');
+            console.log("Token:", token);
+            const response = await axios.post('http://localhost:5004/api/addtocart', {
+                itemId: itemToAdd.id,
+                name: itemToAdd.name,
+                quantity: itemToAdd.quantity,
+                price: itemToAdd.price
+            }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            if (response.status === 201) { 
+                console.log('Item added to cart successfully');
+                setShowNotification(true);
+                setNotificationItemId(itemId); 
+                setButtonColors(prevState => ({
+                  ...prevState,
+                  [itemId]: '#4CAF50' 
+              }));
+                setTimeout(() => {
+                    setShowNotification(false);
+                    setNotificationItemId(null); 
+                    setButtonColors(prevState => ({
+                      ...prevState,
+                      [itemId]: '#d17e25' 
+                  }));
+              }, 2000);
+            } else {
+                console.error('Failed to add item to cart');
+            }
+        } catch (error) {
+            console.error('Error adding item to cart:', error);
+        }
     }
 };
 
@@ -149,46 +191,59 @@ const snacksStoreItems = [
                        </div>
                 ))}
             </div>
-            <div className="basket-container,font-family: 'Poppins', sans-serif;">
-                <h1 className='text-2xl'>My Smart Basket</h1>
-                <div className='basket-grid grid grid-cols-4 gap-4'>
-                {basketItems.map(basketItem => (
-                    <div key={basketItem.id}>
-                        <Image
-                        src={basketItem.id===1?item1: basketItem.id === 2 ? item2 : basketItem.id === 3 ? item3 : item4}
-                        alt={`Item ${basketItem.id}`}
-                                width={250}
-                                height={100}
-                                className='object-cover w-full'
-                        />
-                        <p>{basketItem.name}</p>
-                        <p>Price:Rs. {basketItem.price}</p>
-                        <FormControl>
-                            <InputLabel id={`quantity-label-${basketItem.id}`}></InputLabel>
-                            <Select
-                                labelId={`quantity-label-${basketItem.id}`}
-                                value={basketItem.quantity}
-                                onChange={(event: any) => handleQuantityChange(basketItem.id, event)}
-                            >
-                            
-                                {[0.5,1,1.5, 2,2.5, 3,3.5, 4].map(quantity => (
-                                    <MenuItem key={quantity} value={quantity}>{quantity}kg</MenuItem>
-                                ))}
-                            </Select>
-                            {addedItems.includes(basketItem.id) ? (
-                                    <Button className="mb-4 text-xs md:text-base lg:text-lg" variant="contained" style={{ backgroundColor: '#d17e25' }} color="primary" disabled>
-                                        Added to cart
-                                    </Button>
-                                ) : (
-                                    <Button className="mb-4 text-xs md:text-base lg:text-lg" variant="contained" style={{ backgroundColor: '#d17e25' }} color="primary" onClick={() => handleAddToCart(basketItem.id)}>
-                                        Add to cart
-                                    </Button>
-                                )}
-                        </FormControl>
-                    </div>
+          
+<div className="basket-container,font-family: 'Poppins', sans-serif;">
+<h1 className='text-2xl'>My Smart Basket</h1>
+<div className='basket-grid grid grid-cols-4 gap-4'>
+{basketItems.map(basketItem => (
+    <div key={basketItem.id}>
+        <Image
+        src={basketItem.id===1?item1: basketItem.id === 2 ? item2 : basketItem.id === 3 ? item3 : item4}
+        alt={`Item ${basketItem.id}`}
+                width={250}
+                height={100}
+                className='object-cover w-full'
+        />
+        <p>{basketItem.name}</p>
+        <p>Price:Rs. {basketItem.price}</p>
+        <FormControl>
+            <InputLabel id={`quantity-label-${basketItem.id}`}></InputLabel>
+            <Select
+                labelId={`quantity-label-${basketItem.id}`}
+                value={basketItem.quantity}
+                onChange={(event: any) => handleQuantityChange(basketItem.id, event)}
+            >
+            
+                {[0.5,1,1.5, 2,2.5, 3,3.5, 4].map(quantity => (
+                    <MenuItem key={quantity} value={quantity}>{quantity}kg</MenuItem>
                 ))}
-                </div>
-            </div>
+            </Select>
+  
+            {showNotification && notificationItemId === basketItem.id ? (
+            <Button
+                 variant="contained"
+                 style={{ backgroundColor:  buttonColors[basketItem.id] }} 
+                 color="primary"
+                 onClick={() => setShowNotification(false)}
+                            >
+                              Item added to cart, Add more?
+             </Button>
+               ) : (
+                <Button
+                    variant="contained"
+                    style={{ backgroundColor: buttonColors[basketItem.id] || '#d17e25' }} 
+                    color="primary"
+                    onClick={() => handleAddToCart(basketItem.id)}
+                >
+                    Add to cart
+                </Button>
+            )}
+        </FormControl>
+    </div>
+))}
+</div>
+</div>
+    
 
             <h1 className='text-2xl'>Popular Items</h1>
             <div className="popular-items-card p-2 flex justify-center cursor-pointer">    

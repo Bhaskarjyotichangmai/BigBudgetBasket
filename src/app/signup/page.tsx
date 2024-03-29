@@ -4,7 +4,13 @@ import React, {useEffect,useRef,useState} from "react";
 import {useRouter} from "next/navigation";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import { TextField,ThemeProvider, createTheme } from "@mui/material";
+import { TextField,ThemeProvider, Grid,Button,createTheme,Typography,Box } from "@mui/material";
+import Image from "next/image";
+import Background from "../Dashboard/Components/Background";
+import { red } from "@mui/material/colors";
+import { Poppins } from "next/font/google";
+import { Error } from "mongoose";
+
 
 const theme = createTheme({
   palette: {
@@ -20,25 +26,57 @@ const theme = createTheme({
 export default function SignupPage() {
   const router = useRouter();
 
-  const [username,setUsername]=useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    mobile: ""
+  });
+  const { username, email, password, confirmPassword, mobile } = formData;
+  
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const [usernameError,setUsernameError]=useState("");
+  const [mobileError,setMobileError]=useState("");
+  
+  const [signupMessage, setSignupMessage] = React.useState('');
+  const handleInputChange = (e:any) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+  };
+  
 
   const validateForm = () => {
     let isValid = true;
+    if (!formData.username || !formData.username.length) {
+      setUsernameError("Username cannot be empty");
+      isValid = false;
+    } else {
+      setUsernameError("");
+    }
+    
+    if (!formData.mobile || !formData.mobile.length) {
+      setMobileError("Mobile number is required");
+      isValid = false;
+    } else {
+      setMobileError ("");
+    }
 
-    if (!email || !email.length) {
+
+    if (!formData.email || !formData.email.length) {
       setEmailError("Email is required");
       isValid = false;
     } else {
       setEmailError("");
     }
 
-    if (!password || !password.length) {
+    if (!formData.password || !formData.password.length) {
       setPasswordError("Password is required");
       isValid = false;
     } else if (password.length < 8) {
@@ -48,7 +86,8 @@ export default function SignupPage() {
       setPasswordError("");
     }
 
-    if (!confirmPassword || !confirmPassword.length) {
+
+    if (!formData.confirmPassword || !formData.confirmPassword.length) {
       setConfirmPasswordError("Confirmation of Password is required");
       isValid = false;
     } else if (password !== confirmPassword) {
@@ -61,114 +100,246 @@ export default function SignupPage() {
     return isValid;
   };
 
-  const handleSignup = () => {
+
+  const handleSignup = async() => {
+  try{
     if (validateForm()) {
+      if (mobile.length !== 10) {
+        setMobileError("Mobile number must be exactly 10 digits");
+      } else {
+        setMobileError("");
+     
+        const response = await axios.post('http://localhost:5004/api/signup', {
+          userName: formData.username,
+          email: formData.email,
+          password: formData.password,
+          confirmPassword: formData.confirmPassword,
+          mobile: formData.mobile
+      });
+      console.log(response.data);
+      
+      setSignupMessage("Signup successful!");
+
       localStorage.setItem("email", email);
       localStorage.setItem("password", password);
+      localStorage.setItem("username",username);
+      localStorage.setItem("mobile number",mobile);
+      localStorage.setItem("confirmed Password",confirmPassword);
+      localStorage.setItem("token", response.data.token);
       router.push("/Dashboard");
+      }
     }
-  };
+  }catch (error:any) {
+if (error.response && error.response.data && error.response.data.msg) {
+  const errorMsg = error.response.data.msg;
+  if (error.response.status === 400) {
+    if (errorMsg === 'User already exists with this email') {
+      setEmailError(errorMsg);
+    } else if (errorMsg === 'User already exists with this username') {
+      setUsernameError(errorMsg);
+    } else if (errorMsg === 'User already exists with this mobile number') {
+      setMobileError(errorMsg);
+    } else {
+      console.error("Error signing up:", errorMsg);
+    }
+  } else {
+    console.error("Error signing up:", errorMsg);
+  }
+} else {
+  console.error("Error signing up:", error);
+}
+}
+};
 
   return (
     <ThemeProvider theme={theme}>
-      <main className="flex flex-col md:flex-row min-h-screen">
-        <section className="flex-1 flex items-center justify-center relative md:item-start">
-          <div className="p-6 md:p-12 rounded-lg shadow-xl w-full max-w-lg bg-rgb(129, 140, 248) absolute right-50%">
-            <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-              <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">Sign up for your account!</h2>
-            </div>
-
-            <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-              <form className="space-y-6">
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
-                    Enter Email
-                  </label>
-                  <div className="mt-1">
-                    <TextField
-                      id="email"
-                      fullWidth
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      autoComplete="email"
-                      type="email"
-                      required
-                      placeholder="Email"
-                      error={emailError.length > 0}
-                      helperText={emailError}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
-                    Create Password
-                  </label>
-                  <div className="mt-1">
-                    <TextField
-                      id="password"
-                      name="password"
-                      required
-                      fullWidth
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      autoComplete="current-password"
-                      type="password"
-                      placeholder="Create password"
-                      error={passwordError.length > 0}
-                      helperText={passwordError}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label htmlFor="confirmPassword" className="block text-sm font-medium leading-6 text-gray-900">
-                    Confirm Password
-                  </label>
-                  <div className="mt-1">
-                    <TextField
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      fullWidth
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      autoComplete="confirm-password"
-                      type="password"
-                      placeholder="Confirm password"
-                      required
-                      error={confirmPasswordError.length > 0}
-                      helperText={confirmPasswordError}
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-4 text-sm flex items-center justify-between">
-                  Already have an account?{' '}
-                  <Link href="/login" passHref>
-                    <span className="cursor-pointer font-semibold leading-5 text-indigo-600 hover:text-indigo-400">Login</span>
-                  </Link>
-                  </div>
-                <div>
-                  <button
-                    onClick={handleSignup}
-                    type="button"
-                    className="flex w-full justify-center rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  >
-                    Sign Up
-                  </button>
-                </div>
-                <div className="mt-4 text-xl flex items-center justify-center text-gray-800">Or</div>
-                <div>
-                  <button
-                    type="button"
-                    className="flex w-full justify-center rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 mt-2"
-                  >
-                    Sign Up with Google
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </section>
-      </main>
-    </ThemeProvider>
+    <Grid container spacing={3} alignItems="center" justifyContent="flex-end" style={{ position: 'relative', zIndex: 2}}>
+      <Background />
+      <Grid item xs={12} sm={8} md={6} lg={4} justifyContent="center" alignItems="center" >
+        <div className="p-6 md:p-12 rounded-lg shadow-xl bg-gray-100">
+          <Grid container spacing={2}>
+          <Grid item xs={12} textAlign="center"style={{ position: 'relative', zIndex: 2 }}>
+  <Typography variant="h4" gutterBottom style={{color:"blue",fontWeight:"bold"}}>
+    Welcome to FreshEats!
+  </Typography>
+  <Typography variant="h5" gutterBottom style={{color:"blue"}}>
+    Signup with your mobile or email
+  </Typography>
+</Grid>
+            <Grid item xs={12}>
+              <TextField
+                id="username"
+                label="Enter User Name"
+                placeholder="Enter username"
+                fullWidth
+                value={username}
+                onChange={(e) =>  setFormData({ ...formData, username: e.target.value })}
+                autoComplete="username"
+                required
+                error={!!usernameError}
+                helperText={usernameError}
+                InputLabelProps={{ style: { color: 'blue' } }}
+                InputProps={{
+                  style: { borderColor: '#000002' }, 
+                }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                id="mobile"
+                label="Enter Mobile Number"
+                placeholder="Enter  mobile number"
+                fullWidth
+                value={mobile}
+                onChange={(e) => {
+                  const enteredValue = e.target.value;
+                  const numericValue = enteredValue.replace(/\D/g, '');
+                  const trimmedValue = numericValue.slice(0, 10);
+                  setFormData({ ...formData, mobile: trimmedValue });
+                  if (trimmedValue.length === 10) {
+                    setMobileError(""); 
+                  } else {
+                    setMobileError("Mobile number must be exactly 10 digits"); // Show error message
+                  }
+                }}
+                autoComplete="Mobile number"
+                type="tel"
+                required
+                error={!!mobileError}
+                helperText={mobileError}
+                InputLabelProps={{ style: { color: 'blue' } }}
+                inputProps={{
+                  pattern: "[0-9]{10}", 
+                  inputMode: "numeric" 
+                }}
+                InputProps={{
+                  style: { borderColor: '#000002' }, 
+                }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                id="email"
+                label="Enter Email"
+                placeholder="Enter email id"
+                fullWidth
+                value={email}
+                onChange={(e)=>{ const enteredValue = e.target.value;
+                  const trimmedValue = enteredValue.trim();
+                  setFormData({ ...formData, email: trimmedValue }); 
+                  if (/^\S+@\S+\.\S+$/.test(trimmedValue)) {
+                    
+                    setEmailError(""); 
+                  } else {
+                    setEmailError("Invalid email format"); 
+                  }
+                }}
+                autoComplete="email"
+                type="email"
+                required
+                error={!!emailError}
+                helperText={emailError}
+                InputLabelProps={{ style: { color: 'blue' } }}
+                InputProps={{
+                  style: { borderColor: '#000002' }, 
+                }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                id="password"
+                label="Create Password"
+                placeholder="Enter password"
+                fullWidth
+                value={password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                autoComplete="current-password"
+                type="password"
+                required
+                error={!!passwordError}
+                helperText={passwordError}
+                InputLabelProps={{ style: { color: 'blue' } }}
+                InputProps={{
+                  style: { borderColor: '#000002' }, 
+                }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                id="confirmPassword"
+                label="Confirm Password"
+                placeholder="Reenter your password"
+                fullWidth
+                value={confirmPassword}
+                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                autoComplete="confirm-password"
+                type="password"
+                required
+                error={!!confirmPasswordError}
+                helperText={confirmPasswordError}
+                InputLabelProps={{ style: { color: 'blue' } }}
+                InputProps={{
+                  style: { borderColor: '#000002' }, 
+                }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                onClick={handleSignup}
+                variant="contained"
+                color="primary"
+                fullWidth
+                style={{backgroundColor:"blue"}}
+              >
+                Sign Up
+              </Button>
+            </Grid>
+            {/* <h1>{loading?"Processing":"Signup"}</h1> */}
+            <Grid item xs={12}>
+              <Button
+                variant="contained"
+                color="secondary"
+                fullWidth
+                style={{backgroundColor:"red"}}
+              >
+                Sign Up with Google
+              </Button>
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                style={{backgroundColor:"gray"}}
+              >
+                Sign Up with Mobile OTP
+              </Button>
+            </Grid>
+            <Grid item xs={12} style={{ position: 'absolute', top: 0, left: 0, zIndex: 999 }}>
+  {signupMessage &&(
+     <Box
+     bgcolor={signupMessage==="Signup successful!" ? 'green' : 'red'}
+     color="white"
+     p={2}
+     borderRadius={4}
+     boxShadow="0px 4px 6px rgba(0, 0, 0, 0.1)" 
+   >
+     <Typography variant="body1">{signupMessage}</Typography>
+   </Box>
+ )}
+</Grid>
+            <Grid item xs={12} style={{ position: 'relative', zIndex: 2 }}>
+              <Typography variant="body2" align="center" gutterBottom>
+                Already have an account?{' '}
+                <Link href="/login" passHref>
+                  <span className="cursor-pointer font-semibold leading-5 text-indigo-600 hover:text-indigo-400">Login</span>
+                </Link>
+              </Typography>
+            </Grid>
+          </Grid>
+        </div>
+      </Grid>
+    </Grid>
+  </ThemeProvider>
   );
 }
