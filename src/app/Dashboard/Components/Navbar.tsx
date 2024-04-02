@@ -23,8 +23,8 @@ function Navbar() {
     useEffect(() => {
         const storedEmail = localStorage.getItem('email');
         const storedUsername=localStorage.getItem('username');
-        if (storedEmail) {
-            setUserEmail(storedEmail);
+        if (storedUsername) {
+            setUserEmail(storedUsername);
         }
         
     }, []);
@@ -76,7 +76,7 @@ function Navbar() {
 
   return (
     <main>
-        <nav className='navbar flex justify-between px-8 items-center py-6 bg-blue-500'>
+        <nav className='navbar flex justify-between px-8 items-center py-6 bg-cyan-600'>
           <div className='flex items-center gap-8 justify-between'>
       <section className='flex items-center gap-4 '>
         
@@ -111,17 +111,20 @@ function Navbar() {
                <Avatar alt="User Avatar" className='cursor-pointer' src="/static/images/avatar/1.jpg"onClick={handleAvatarClick} />
                {isLogoutVisible&&(
                 <div className="absolute top-full left-0 bg-black p-2 rounded-md shadow-md z-20">
-                <button onClick={handleLogout} className='text-sm font-bold bg-gray-300 rounded-sm mb-1 px-1'>
-                    Logout
-                </button>
+               
                 <button className='text-sm font-bold bg-gray-300 rounded-sm mb-1 px-1 w-full'>
-                    item1
+                   <Link href="/Cart">
+                    MyCart
+                    </Link> 
                 </button>
                 <button className='text-sm font-bold bg-gray-300 rounded-sm mb-1 px-1 w-full'>
                     item2
                 </button>
-                <button className='text-sm font-bold bg-gray-300 rounded-sm px-1 w-full'>
+                <button className='text-sm font-bold bg-gray-300 rounded-sm mb-1 px-1 w-full'>
                     item3
+                </button>
+                <button onClick={handleLogout} className='text-sm font-bold bg-gray-300 rounded-sm mb-1 px-1'>
+                    Logout
                 </button>
                 </div>
                )}
