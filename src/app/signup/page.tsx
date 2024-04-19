@@ -10,7 +10,7 @@ import Background from "../Dashboard/Components/Background";
 import { red } from "@mui/material/colors";
 import { Poppins } from "next/font/google";
 import { Error } from "mongoose";
-
+import { signIn, signOut, useSession,getSession } from 'next-auth/react' 
 
 const theme = createTheme({
   palette: {
@@ -25,7 +25,7 @@ const theme = createTheme({
 
 export default function SignupPage() {
   const router = useRouter();
-
+  const { data: session } = useSession();
 
   const [formData, setFormData] = useState({
     username: "",
@@ -150,6 +150,64 @@ if (error.response && error.response.data && error.response.data.msg) {
 }
 }
 };
+const handleGoogleSignup=async()=>{
+  window.open("http://localhost:5004/auth/google/callback","_self")
+}
+// const handleGoogleSignup = async () => {
+//   try {
+//     await signIn('google', { callbackUrl: 'http://localhost:3000/Dashboard' });
+
+//     const sessionData = await getSession();
+
+//     if (sessionData?.user) {
+//       const { email, name, image } = sessionData.user;
+//       const googleId = (sessionData.user as any).id; 
+
+//       const googleResponse = await axios.post('http://localhost:5004/api/google-login', {
+//         email:email??'',
+//         name:name??'',
+//         image:image??'',
+//         googleId: googleId ??'',
+//       });
+
+//       if (googleResponse.status === 200 && googleResponse.data && googleResponse.data.msg === 'Login successful') {
+//         setSignupMessage("Signed up with Google successfully!");
+//         localStorage.setItem("email", email??'');
+//         localStorage.setItem("username", name??'');
+//         localStorage.setItem("image", image??'');
+//         localStorage.setItem("googleId", googleId ?? '');
+//         router.push("/Dashboard");
+//       } else {
+//         toast.error("Signup with Google failed");
+//       }
+//     }
+//   } catch (error) {
+//     console.error("Error signing up with Google:", error);
+//   }
+// };
+
+// useEffect(() => {
+//   const fetchSessionData = async () => {
+//     try {
+//       const sessionData = await getSession();
+
+//       if (sessionData?.user) {
+//         const { email, name, image } = sessionData.user;
+//         const googleId = (sessionData.user as any).id;
+
+//         localStorage.setItem("email", email ?? "");
+//         localStorage.setItem("username", name ?? "");
+//         localStorage.setItem("image", image ?? "");
+//         localStorage.setItem("googleId", googleId ?? "");
+//         router.push('/Dashboard');
+//       }
+//     } catch (error) {
+//       console.error("Error fetching session data:", error);
+//     }
+//   };
+
+//   fetchSessionData();
+// }, [session]);
 
   return (
     <ThemeProvider theme={theme}>
@@ -297,6 +355,7 @@ if (error.response && error.response.data && error.response.data.msg) {
             {/* <h1>{loading?"Processing":"Signup"}</h1> */}
             <Grid item xs={12}>
               <Button
+                onClick={handleGoogleSignup}
                 variant="contained"
                 color="secondary"
                 fullWidth

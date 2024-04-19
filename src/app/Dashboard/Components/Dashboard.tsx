@@ -3,12 +3,12 @@ import React,{ChangeEvent, ReactNode} from 'react'
 import { TextField,InputAdornment, Box, Button, Select, MenuItem, FormControl, InputLabel, SelectChangeEvent } from '@mui/material'
 import Image from 'next/image'
 import axios from 'axios'
-
-import search from '../../Assets/search.png'
+import Link from 'next/link'
 import Hero from './Hero'
+import search from '../../Assets/search.png'
 import image from '../../Assets/image.png'
 import imagee from '../../Assets/imagee.png'
-import { useState } from 'react'
+import { useState,useEffect } from 'react'
 import { unknown } from 'zod'
 import item1 from '../../Assets/image 3.png'
 import item2 from '../../Assets/image5.png'
@@ -31,46 +31,77 @@ import item18 from '../../Assets/image 30.png'
 import item19 from '../../Assets/image 31.png'
 import item20 from '../../Assets/image 32.png'
 import item21 from '../../Assets/image 33.png'
+import { basketItems,sliderItems } from '@/app/(Items)/Items'
+import ImageSlider from './ImageSlider'
 
 export default function Dashboard() {
-
   function handleSearch() {
     console.log('Searching...')
  }
 
+const [showCategories, setShowCategories] = useState(false);
 
- const [addedItems, setAddedItems] = useState<number[]>([]);
+const handleCategoriesClick = () => {
+  setShowCategories(!showCategories);
+};
+const [toggleCategories, setToggleCategories] = useState(false);
+const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
- const [basketItems, setBasketItems] = useState([
-  { id: 1, name: 'Item1', quantity: 1,price:50},
-  { id: 2, name: 'Item2', quantity: 1,price:15},
-  { id: 3, name: 'Item3', quantity: 1,price:80},
-  { id: 4, name: 'Item4', quantity: 1,price:60}
-]);
-function handleQuantityChange(itemId:number, event:React.ChangeEvent<{value:unknown}>) {
-  const updatedBasketItems = basketItems.map(item => {
-      if (item.id === itemId) {
-          return { ...item, quantity: event.target.value as number};
-      }
-      return item;
+const handleCategoryClick = (categoryName: string) => {
+  setActiveCategory(activeCategory === categoryName ? null : categoryName);
+};
+const [basketItemsState, setBasketItems] = useState(basketItems);
+
+
+
+
+function handleQuantityChange(itemId: number, event: React.ChangeEvent<{ value: unknown }>) {
+  const updatedBasketItems = basketItemsState.map(category => {
+  
+    if (category.items.some(item => item.id === itemId)) {
+      
+      const updatedItems = category.items.map(item => {
+        if (item.id === itemId) {
+          return { ...item, quantity: event.target.value as number };
+        }
+        return item;
+      });
+      
+      return { ...category, items: updatedItems };
+    }
+    return category;
   });
   setBasketItems(updatedBasketItems);
 }
- const categories = [
-  'Shop by category',
-  'Exotic fruits and vegetables',
-  'Nandini',
+
+
+ const topButtons = [
+  'Categories',
+  'Exotic fruits',
+  'Milk',
   'Ghee',
   'Meat',
   'Fish',
-  '>>'
+  'Eggs',
+  'Yogurt',
+  'Juice',
+  'Vegetables',
+  'Spices'
 ];
-
+const topButtonClick = () => {
+  setToggleCategories(!toggleCategories);
+};
 
  const items = [
   { id: 1, name: 'Item 1',  image:image,imagee:imagee},
 ];
+const [currentSlide, setCurrentSlide] = useState(0);
 
+
+
+const handleTopButtonHover = (index: number) => {
+  setCurrentSlide(index);
+};
 const popularItems=[
        { id:1,name:'Popularitem1',image:item5},
        { id:2,name:'Popularitem2',image:item6},
@@ -104,46 +135,56 @@ const snacksStoreItems = [
   const [buttonColors, setButtonColors] = useState<{ [key: number]: string }>({});
 
 
-  const handleAddToCart = async (itemId: number) => {
-    const itemToAdd = basketItems.find(item => item.id === itemId);
+
+const handleAddToCart = async (itemId: number) => {
+  
+  const categoryWithItem = basketItems.find(category =>
+    category.items.some(item => item.id === itemId)
+  );
+
+  if (categoryWithItem) {
+   
+    const itemToAdd = categoryWithItem.items.find(item => item.id === itemId);
+    
     if (itemToAdd) {
-        try {
-            const token=localStorage.getItem('token');
-            console.log("Token:", token);
-            const response = await axios.post('http://localhost:5004/api/addtocart', {
-                itemId: itemToAdd.id,
-                name: itemToAdd.name,
-                quantity: itemToAdd.quantity,
-                price: itemToAdd.price
-            }, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            if (response.status === 201) { 
-                console.log('Item added to cart successfully');
-                setShowNotification(true);
-                setNotificationItemId(itemId); 
-                setButtonColors(prevState => ({
-                  ...prevState,
-                  [itemId]: '#4CAF50' 
-              }));
-                setTimeout(() => {
-                    setShowNotification(false);
-                    setNotificationItemId(null); 
-                    setButtonColors(prevState => ({
-                      ...prevState,
-                      [itemId]: '#d17e25' 
-                  }));
-              }, 2000);
-            } else {
-                console.error('Failed to add item to cart');
-            }
-        } catch (error) {
-            console.error('Error adding item to cart:', error);
+      try {
+        const token = localStorage.getItem('token');
+        console.log("Token:", token);
+        const response = await axios.post('http://localhost:5004/api/addtocart', {
+          itemId: itemToAdd.id,
+          name: itemToAdd.name,
+          quantity: itemToAdd.quantity,
+          price: itemToAdd.price
+        }, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (response.status === 201) { 
+          console.log('Item added to cart successfully');
+          setShowNotification(true);
+          setNotificationItemId(itemId); 
+          setButtonColors(prevState => ({
+            ...prevState,
+            [itemId]: '#4CAF50' 
+          }));
+          setTimeout(() => {
+            setShowNotification(false);
+            setNotificationItemId(null); 
+            setButtonColors(prevState => ({
+              ...prevState,
+              [itemId]: '#d17e25' 
+            }));
+          }, 2000);
+        } else {
+          console.error('Failed to add item to cart');
         }
+      } catch (error) {
+        console.error('Error adding item to cart:', error);
+      }
     }
+  }
 };
 
   return (
@@ -175,11 +216,23 @@ const snacksStoreItems = [
                 />
         </div>
     </div>
-    <Box className="horizontal-boxes justify-center flex cursor-pointer">
-    {categories.map((category, index) => (
-                    <Box key={index} className="box">{category}</Box>
-                ))}
-            </Box>
+    <Box className="horizontal-boxes grid grid-flow-col justify-between gap-4 cursor-pointer overflow-x-scroll" style={{ marginLeft: '-10px', marginRight: '-10px' }}>
+    
+    {topButtons.map((category, index) => (
+          <Button 
+            key={index} 
+            className={`box ${category === '>>' ? 'small-button' :'regular-button'}`}
+            onMouseEnter={() => handleTopButtonHover(index)}
+            onMouseLeave={() => setCurrentSlide(0)}
+            onClick={category === 'Categories' ? handleCategoriesClick : () => handleCategoryClick(category)}
+          >
+            {category}
+          </Button>
+        ))}              
+      </Box>
+      
+        <ImageSlider currentSlide={currentSlide} onHoverSlideChange={handleTopButtonHover} />
+      
     <div className="item-cards-container flex">
                 {items.map(item => (
                     <div key={item.id} className='flex items-center'>
@@ -192,58 +245,89 @@ const snacksStoreItems = [
                 ))}
             </div>
           
-<div className="basket-container,font-family: 'Poppins', sans-serif;">
-<h1 className='text-2xl'>My Smart Basket</h1>
-<div className='basket-grid grid grid-cols-4 gap-4'>
-{basketItems.map(basketItem => (
-    <div key={basketItem.id}>
-        <Image
-        src={basketItem.id===1?item1: basketItem.id === 2 ? item2 : basketItem.id === 3 ? item3 : item4}
-        alt={`Item ${basketItem.id}`}
-                width={250}
-                height={100}
-                className='object-cover w-full'
-        />
-        <p>{basketItem.name}</p>
-        <p>Price:Rs. {basketItem.price}</p>
-        <FormControl>
-            <InputLabel id={`quantity-label-${basketItem.id}`}></InputLabel>
-            <Select
-                labelId={`quantity-label-${basketItem.id}`}
-                value={basketItem.quantity}
-                onChange={(event: any) => handleQuantityChange(basketItem.id, event)}
+
+    <div className="basket-container,font-family: 'Poppins', sans-serif;">
+    <h1 className='text-3xl'>My Smart Basket</h1>
+      
+      <button
+        className="category-button bg-blue-500 text-white px-4 py-2 m-2 rounded"
+        onClick={handleCategoriesClick}
+      >
+        Categories
+      </button>
+
+      {showCategories && (
+        <div className="flex flex-wrap">
+          {basketItemsState.map(category => (
+            <button
+              key={category.category}
+              className={`category-button bg-blue-500 text-white px-4 py-2 m-2 rounded ${activeCategory === category.category ? 'bg-blue-700' : ''}`}
+              onClick={() => handleCategoryClick(category.category)}
             >
-            
-                {[0.5,1,1.5, 2,2.5, 3,3.5, 4].map(quantity => (
-                    <MenuItem key={quantity} value={quantity}>{quantity}kg</MenuItem>
-                ))}
-            </Select>
-  
-            {showNotification && notificationItemId === basketItem.id ? (
-            <Button
-                 variant="contained"
-                 style={{ backgroundColor:  buttonColors[basketItem.id] }} 
-                 color="primary"
-                 onClick={() => setShowNotification(false)}
-                            >
-                              Item added to cart, Add more?
-             </Button>
-               ) : (
-                <Button
-                    variant="contained"
-                    style={{ backgroundColor: buttonColors[basketItem.id] || '#d17e25' }} 
-                    color="primary"
-                    onClick={() => handleAddToCart(basketItem.id)}
-                >
-                    Add to cart
-                </Button>
-            )}
-        </FormControl>
+              {category.category}
+            </button>
+          ))}
+        </div>
+      )}
+
+      
+      {basketItemsState.map(category => (
+        <div key={category.category}>
+          
+          {activeCategory === category.category && (
+            <div className='basket-grid grid grid-cols-4 gap-4'>
+              {category.items.map(basketItem => (
+                <div key={basketItem.id}>
+                 <Link href={`/items/${basketItem.id}`}>
+                  <Image
+                    src={basketItem.image}
+                    alt={`Item ${basketItem.id}`}
+                    width={250}
+                    height={100}
+                    className='object-cover w-full'
+                  />
+                  <p>{basketItem.name}</p>
+                  <p>Price: Rs. {basketItem.price}</p>
+                  </Link>
+                  <FormControl>
+                    <InputLabel id={`quantity-label-${basketItem.id}`}></InputLabel>
+                    <Select
+                      labelId={`quantity-label-${basketItem.id}`}
+                      value={basketItem.quantity}
+                      onChange={(event: any) => handleQuantityChange(basketItem.id, event)}
+                    >
+                      {[0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4].map(quantity => (
+                        <MenuItem key={quantity} value={quantity}>{quantity}kg</MenuItem>
+                      ))}
+                    </Select>
+                    {showNotification && notificationItemId === basketItem.id ? (
+                      <Button
+                        variant="contained"
+                        style={{ backgroundColor: buttonColors[basketItem.id] }}
+                        color="primary"
+                        onClick={() => setShowNotification(false)}
+                      >
+                        Item added to cart, Add more?
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="contained"
+                        style={{ backgroundColor: buttonColors[basketItem.id] || '#d17e25' }}
+                        color="primary"
+                        onClick={() => handleAddToCart(basketItem.id)}
+                      >
+                        Add to cart
+                      </Button>
+                    )}
+                  </FormControl>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
     </div>
-))}
-</div>
-</div>
-    
+
 
             <h1 className='text-2xl'>Popular Items</h1>
             <div className="popular-items-card p-2 flex justify-center cursor-pointer">    

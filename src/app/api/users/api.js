@@ -4,17 +4,20 @@ const cors = require("cors");
 const jwt = require('jsonwebtoken');
 const authMiddleware = require('./authMiddleware');
 const generateSecretkey = require('./generateSecretkey');
-// const passport = require('passport');
+const session=require("express-session");
+const passport = require('passport');
 // const GoogleStrategy = require('passport-google-oauth20').Strategy;
-// require("dotenv").config();
+const OAuth2Strategy = require("passport-google-oauth2").Strategy;
+require("dotenv").config();
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-
 const corsOptions = {
-    origin: 'http://localhost:3000',
+    origin: ['http://localhost:3000','http://localhost:5004'],
+    methods: 'GET,POST,PUT,DELETE',
+    credentials: true
 };
 app.use(cors(corsOptions));
 
@@ -73,7 +76,10 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
 
 const User = mongoose.model('User', userSchema,'signedupusers');
 
-mongoose.connect('mongodb://localhost:27017/signup')
+mongoose.connect('mongodb://localhost:27017/signup',{
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+})
     .then(() => console.log("Connected to database"))
     .catch(err => console.error('Error connecting to MongoDB:', err));
 
@@ -271,62 +277,120 @@ app.delete('/api/deleteCartItem/:itemId', async (req, res) => {
     }
 });
 
+const GoogleLoginSchema = new mongoose.Schema({
+    googleEmail: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    googleUserName: {
+        type: String,
+        required: true
+    },
+    image: {
+        type: String
+    },
+    googleId: {
+        type: String,
+        required: true,
+        unique: true
+    }
+});
+
+const GoogleLogin = mongoose.model('GoogleLogin', GoogleLoginSchema);
+
+const clientid = "502417525504-r1ad88a8n7c38unlter2dfo5n189ivp5.apps.googleusercontent.com"
+const clientsecret = "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"
+
+app.use(session({
+    secret:"14454h5h5hhttgeef48488",
+    resave:false,
+    saveUninitialized:true
+}))
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(
+    new OAuth2Strategy({
+        clientID:clientid,
+        clientSecret:clientsecret,
+        callbackURL:"/auth/google/callback",
+        scope:["profile","email"]
+    },
+    async(accessToken,refreshToken,profile,done)=>{
+        try {
+            let existingUser = await GoogleLogin.findOne({ googleId: profile.id });
+
+            if (!existingUser) {
+                const newUser = new GoogleLogin({
+                    googleEmail: profile.email,
+                    googleUserName: profile.displayName,
+                    image: profile.picture,
+                    googleId: profile.id
+                });
+                await newUser.save();
+                done(null, newUser);
+            } else {
+                done(null, existingUser);
+            }
+        } catch (error) {
+            console.error('Error storing session data:', error);
+            done(error);
+        }
+    })
+);
+passport.serializeUser((user,done)=>{
+    done(null,user.id);
+})
+
+passport.deserializeUser(async (id, done) => {
+    try {
+        const user = await GoogleLogin.findById(id);
+        done(null, user);
+    } catch (error) {
+        done(error);
+    }
+});
 
 
+app.get("/auth/google",passport.authenticate("google",{scope:["profile","email"]}));
+
+app.get("/auth/google/callback",passport.authenticate("google",{
+    successRedirect:"http://localhost:3000/Dashboard",
+    failureRedirect:"http://localhost:3000/login",
+}))
+app.get("/login/sucess",async(req,res)=>{
+
+    if (req.user) {
+        const { googleEmail, googleUserName, image, googleId } = req.user;
+        res.status(200).json({ message: "user Login", user: req.user });
+
+        // Update localStorage
+        localStorage.setItem('googleEmail', googleEmail);
+        localStorage.setItem('googleUsername', googleUserName);
+        localStorage.setItem('image', image);
+        localStorage.setItem('googleId', googleId);
+    } else {
+        res.status(400).json({ message: "Not Authorized" });
+    }
+});
+app.get('/login/failure', (req, res) => {
+    res.status(401).json({
+        msg: 'Login failed'
+    });
+});
+app.get("/logout",(req,res,next)=>{
+    req.logout(function(err){
+        if(err){return next(err)}
+        localStorage.removeItem('googleId');
+        localStorage.removeItem('googleEmail');
+        localStorage.removeItem('googleUsername');
+        localStorage.removeItem('image');
+        res.redirect("http://localhost:3000");
+    })
+})
 
 app.listen(5004, () => {
     console.log("Server on port 5004 connected");
 });
 
-
-// passport.use(new GoogleStrategy({
-//     clientID: '502417525504-r1ad88a8n7c38unlter2dfo5n189ivp5.apps.googleusercontent.com',
-//     clientSecret: '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',
-//     callbackURL: 'http://localhost:5004/auth/google/callback'
-//   },
-//   async function(accessToken, refreshToken, profile, done) {
-//     try {
-        
-//         const { id, displayName, emails, photos } = profile;
-
-       
-//         let user = await User.findOne({ googleId: id });
-  
-        
-//         if (!user) {
-          
-//           const email = emails[0].value;
-  
-          
-//           user = new User({
-//             googleId: id,
-//             displayName,
-//             email,
-            
-//           });
-  
-          
-//           await user.save();
-//         }
-  
-        
-//         return done(null, user);
-//     } catch (error) {
-//       console.error('Error authenticating with Google:', error);
-//       return done(error, null);
-//     }
-//   }
-// ));
-
-
-// app.get('/auth/google',
-//   passport.authenticate('google', { scope: ['profile', 'email'] })
-// );
-
-// app.get('/auth/google/callback',
-//   passport.authenticate('google', { failureRedirect: '/login' }),
-//   function(req, res) {
-    
-//     res.redirect('/Dashboard');
-//   }
-// );

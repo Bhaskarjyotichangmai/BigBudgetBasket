@@ -8,6 +8,7 @@ import { TextField,ThemeProvider, createTheme,Grid,Button,Typography,Box } from 
 import backgroundimg from '../Assets/backgroundimg.svg'
 import background from '../Dashboard/Components/Background'
 import Background from "../Dashboard/Components/Background";
+import { useSession, getSession } from 'next-auth/react';
 
 
 const theme = createTheme({
@@ -24,7 +25,7 @@ const theme = createTheme({
 
 export default function LoginPage() {
     const router = useRouter();
-
+    
     const [emailError,setEmailError]=React.useState("");
     const [passwordError,setPasswordError]=React.useState("");
 
@@ -100,15 +101,49 @@ export default function LoginPage() {
       }
     }
     
-    const onLoginWithGoogle=async()=>{
-      try {
-        const response = await axios.get('http://localhost:6005/auth/google/callback');   
-        window.location.href = response.data.authUrl;
-    } catch (error) {
-        console.error('Error logging in with Google:', error);
-        toast.error("Error logging in with Google. Please try again.");
-    }
-    }
+    // const onLoginWithGoogle=async()=>{
+    //   const newWindow = window.open("http://localhost:5004/auth/google/callback","_self")
+    //       window.addEventListener('message', (event) => {
+    //     if (event.origin !== window.location.origin) return;
+        
+    //     const { googleEmail, googleUserName, image, googleId } = event.data;
+        
+    //     // Update localStorage
+    //     localStorage.setItem('googleEmail', googleEmail);
+    //     localStorage.setItem('googleUsername', googleUserName);
+    //     localStorage.setItem('image', image);
+    //     localStorage.setItem('googleId', googleId);
+        
+    //     // Close the popup window
+    //     newWindow?.close();
+    //     // Redirect or perform any other action
+    //     router.push('/Dashboard');
+    // }, false);
+    // }
+    const onLoginWithGoogle = async () => {
+      const newWindow = window.open("http://localhost:5004/auth/google/callback", "_self");
+      
+      const handleEvent = async (event: MessageEvent) => {
+          if (event.origin !== window.location.origin) return;
+  
+          const { googleEmail, googleUserName, image, googleId } = event.data;
+  
+          // Update localStorage
+          localStorage.setItem('googleEmail', googleEmail);
+          localStorage.setItem('googleUsername', googleUserName);
+          localStorage.setItem('image', image);
+          localStorage.setItem('googleId', googleId);
+  
+          // Fetch updated session
+          const session = await getSession();
+          
+          // Redirect or perform any other action
+          router.push('/Dashboard');
+      };
+  
+      window.addEventListener('message', handleEvent, false);
+  }
+  
     const onLoginWithMobile=async()=>{
         console.log('Check Otp');
     }

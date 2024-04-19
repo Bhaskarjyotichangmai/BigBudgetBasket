@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import Navbar from '../home/Components/Navbar'
+import Navbar from '../Home/Components/Navbar'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
