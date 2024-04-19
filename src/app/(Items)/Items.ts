@@ -8,6 +8,17 @@ import orangejuice from '../assets/orangejuice.svg'
 import pineapplejuice from '../assets/pineapplejuice.svg'
 import bananashake from '../assets/bananashake.svg'
 import strawberryshake from '../assets/strawberryshake.svg'
+import milk from '../assets/milk.svg'
+import ghee from '../assets/ghee.svg'
+import exotic from '../assets/composition-with-tropical-fruits-wooden-surface.svg'
+import category from '../assets/category.svg'
+import fish from '../assets/fish 1.svg'
+import meat from '../assets/meat.svg'
+import eggs from '../assets/eggs 1.svg'
+import spices from '../assets/spices 1.svg'
+import vegetables from '../assets/vegetables 1.svg'
+import yogurt from '../assets/yogurt 1.svg'
+import juices from '../assets/juice 1.svg'
 
 export interface Items {
     id: number;
@@ -23,6 +34,11 @@ export interface Items {
     items: Items[];
   }
   
+  interface topButtonItems{
+    id:number;
+    image:StaticImageData;
+    name:string
+  }
 
    export const basketItems: Category[] = [
     {
@@ -59,3 +75,16 @@ export interface Items {
     }
   ];
  
+  export const sliderItems: topButtonItems[] = [
+   {id:1,image:category,name:category},
+   {id:2,image:exotic,name:exotic},
+   {id:3,image:milk,name:milk},
+   {id:4,image:ghee,name:ghee},
+   {id:5,image:meat,name:meat},
+   {id:6,image:fish,name:fish},
+   {id:7,image:eggs,name:eggs},
+   {id:8,image:yogurt,name:yogurt},
+   {id:9,image:juices,name:juices},
+   {id:10,image:vegetables,name:vegetables},
+   {id:11,image:spices,name:spices},
+  ]

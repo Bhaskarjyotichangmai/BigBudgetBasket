@@ -6,7 +6,8 @@ const authMiddleware = require('./authMiddleware');
 const generateSecretkey = require('./generateSecretkey');
 const session=require("express-session");
 const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
+// const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const OAuth2Strategy = require("passport-google-oauth2").Strategy;
 require("dotenv").config();
 
 const app = express();
@@ -14,7 +15,7 @@ app.use(express.json());
 app.use(cors());
 
 const corsOptions = {
-    origin: ['http://localhost:3000', 'http://localhost:5004'],
+    origin: ['http://localhost:3000','http://localhost:5004'],
     methods: 'GET,POST,PUT,DELETE',
     credentials: true
 };
@@ -276,228 +277,118 @@ app.delete('/api/deleteCartItem/:itemId', async (req, res) => {
     }
 });
 
+const GoogleLoginSchema = new mongoose.Schema({
+    googleEmail: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    googleUserName: {
+        type: String,
+        required: true
+    },
+    image: {
+        type: String
+    },
+    googleId: {
+        type: String,
+        required: true,
+        unique: true
+    }
+});
 
-// const clientID= "502417525504-r1ad88a8n7c38unlter2dfo5n189ivp5.apps.googleusercontent.com",
-// const clientSecret= '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';
-// app.use(session({
-//     secret:"156729873hahgdfy",
-//     resave:false,
-//     saveUninitialized: false
-// }))
+const GoogleLogin = mongoose.model('GoogleLogin', GoogleLoginSchema);
 
-const googleSchema=new mongoose.Schema({
-    
-    name:String,
-    email:String,
-    image:String,
-    googleId: String
-},{timestamps:true})
-const GoogleLogin = mongoose.model('googleLogin', googleSchema,'googlelogin');
+const clientid = "502417525504-r1ad88a8n7c38unlter2dfo5n189ivp5.apps.googleusercontent.com"
+const clientsecret = "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"
 
 app.use(session({
-    secret: generateSecretkey(),
-    resave: false,
-    saveUninitialized: false
-}));
-
+    secret:"14454h5h5hhttgeef48488",
+    resave:false,
+    saveUninitialized:true
+}))
 app.use(passport.initialize());
 app.use(passport.session());
 
-passport.use(new GoogleStrategy({
-    clientID: "502417525504-r1ad88a8n7c38unlter2dfo5n189ivp5.apps.googleusercontent.com",
-    clientSecret: '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',
-    // callbackURL:"http://localhost:5004/api/google-login"
-    callbackURL: "http://localhost:5004/auth/google/callback"
-    // callbackURL:"http://localhost:3000/Dashboard"
-},
-async (accessToken, refreshToken, profile, done) => {
-    try {
-        // Check if user exists in the database
-        let user = await GoogleLogin.findOne({ googleId: profile.id });
+passport.use(
+    new OAuth2Strategy({
+        clientID:clientid,
+        clientSecret:clientsecret,
+        callbackURL:"/auth/google/callback",
+        scope:["profile","email"]
+    },
+    async(accessToken,refreshToken,profile,done)=>{
+        try {
+            let existingUser = await GoogleLogin.findOne({ googleId: profile.id });
 
-        if (!user) {
-            // Create a new user if not exists
-            user = new GoogleLogin({
-                googleId: profile.id,
-                name: profile.displayName,
-                email: profile.emails[0].value,
-                image: profile.photos[0].value,
-            });
-            await user.save();
+            if (!existingUser) {
+                const newUser = new GoogleLogin({
+                    googleEmail: profile.email,
+                    googleUserName: profile.displayName,
+                    image: profile.picture,
+                    googleId: profile.id
+                });
+                await newUser.save();
+                done(null, newUser);
+            } else {
+                done(null, existingUser);
+            }
+        } catch (error) {
+            console.error('Error storing session data:', error);
+            done(error);
         }
+    })
+);
+passport.serializeUser((user,done)=>{
+    done(null,user.id);
+})
 
+passport.deserializeUser(async (id, done) => {
+    try {
+        const user = await GoogleLogin.findById(id);
         done(null, user);
     } catch (error) {
-        done(error, null);
+        done(error);
     }
-}));
-
-passport.serializeUser((user, done) => {
-    done(null, user.id);
 });
 
-passport.deserializeUser((id, done) => {
-    GoogleLogin.findById(id, (err, user) => {
-        done(err, user);
-    });
+
+app.get("/auth/google",passport.authenticate("google",{scope:["profile","email"]}));
+
+app.get("/auth/google/callback",passport.authenticate("google",{
+    successRedirect:"http://localhost:3000/Dashboard",
+    failureRedirect:"http://localhost:3000/login",
+}))
+app.get("/login/sucess",async(req,res)=>{
+
+    if (req.user) {
+        const { googleEmail, googleUserName, image, googleId } = req.user;
+        res.status(200).json({ message: "user Login", user: req.user });
+
+        // Update localStorage
+        localStorage.setItem('googleEmail', googleEmail);
+        localStorage.setItem('googleUsername', googleUserName);
+        localStorage.setItem('image', image);
+        localStorage.setItem('googleId', googleId);
+    } else {
+        res.status(400).json({ message: "Not Authorized" });
+    }
 });
-
-// Google OAuth login route
-app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-
-// Google OAuth callback route
-app.get('/auth/google/callback', passport.authenticate('google', {
-    successRedirect: '/api/google-login-success',
-    failureRedirect: '/api/google-login-failure'
-}));
-
-// POST endpoint to handle successful Google login
-app.post('/api/google-login-success', (req, res) => {
-    const { email, name, image } = req.user;
-    res.status(200).json({
-        msg: 'Login successful',
-        email,
-        name,
-        image
-    });
-});
-// POST endpoint to handle failed Google login
-app.post('/api/google-login-failure', (req, res) => {
+app.get('/login/failure', (req, res) => {
     res.status(401).json({
         msg: 'Login failed'
     });
 });
-// POST endpoint to store session data in DB
-app.post('/api/google-login', async (req, res) => {
-    const { email, name, image } = req.body;
-
-    try {
-        let user = await GoogleLogin.findOne({ email });
-
-        if (!user) {
-            user = new GoogleLogin({
-                email,
-                name,
-                image
-            });
-            await user.save();
-        }
-
-        res.status(200).json({
-            msg: 'Session data stored successfully',
-            user
-        });
-    } catch (error) {
-        console.error('Error storing session data:', error);
-        res.status(500).json({
-            msg: 'Error storing session data'
-        });
-    }
-});
-// async (req,res, profile, done) => {
-//     try {
-//         const { displayName, email, image } = req.user;
-//         let user = await googleLogin.findOne({ googleId: profile.displayName});
-
-//         if (!user) {
-//             // If the user doesn't exist, create a new user
-//             user = new googleLogin({
-                
-//                 name: profile.displayName,
-//                 email: profile.emails[0].value,
-//                 image: profile.photos[0].value
-               
-//             });
-
-//             // Save the new user to the database
-//             await user.save();
-//         }
-//         res.redirect('http://localhost:3000/Dashboard');
-//     } catch (error) {
-//         console.error('Error during Google OAuth login:', error);
-//         res.status(500).json({ message: 'Server error' });
-//        return done(error, null);
-//     }
-
-// }));
-
-// // Serialize user
-// passport.serializeUser((user, done) => {
-//     done(null, user.id);
-// });
-
-// // Deserialize user
-// passport.deserializeUser((id, done) => {
-//     googleLogin.findById(id, (err, user) => {
-//         done(err, user);
-//     });
-// });
-
-// // Route for initiating Google OAuth login
-// app.get('/auth/google',
-//     passport.authenticate('google', { scope: ['profile', 'email'] }));
-
-// // Route for handling Google OAuth callback
-// app.get('/auth/google/callback',
-//     passport.authenticate('google', { failureRedirect: 'http://localhost:3000/login' }),
-//     (req, res) => {
-//         console.log("Google OAuth authentication successful");
-//         // Successful authentication, redirect to desired location
-//         res.redirect('http://localhost:3000/Dashboard');
-//     });
-
-
-//     app.get("/login/success",async(req,res)=>{
-
-//         if(req.user){
-//             res.status(200).json({message:"user Login",user:req.user})
-//         }else{
-//             res.status(400).json({message:"Not Authorized"})
-//         }
-//     })
-    
-//     app.get("/logout",(req,res,next)=>{
-//         req.logout(function(err){
-//             if(err){return next(err)}
-//             res.redirect("http://localhost:3000");
-//         })
-//     })
-
-    // app.post('/api/signup/google', async (req, res) => {
-    //     try {
-    //         const { email, name } = req.body;
-    
-            
-    //         let existingUser = await googleLogin.findOne({ email });
-    
-    //         if (!existingUser) {
-                
-    //         existingUser = new googleLogin({
-    //             googleId: profile.id,
-    //             displayName: profile.displayName,
-    //             email: profile.emails[0].value,
-    //             image: profile.photos[0].value
-                    
-    //             });
-    
-                
-    //             await existingUser.save();
-    
-                
-    //             res.status(201).json({ message: 'User signed up successfully', user: existingUser });
-    //         } else {
-    //             console.log("User found in the database");
-                
-    //             res.status(200).json({ message: 'User already exists', user: existingUser });
-    //         }
-    //     } catch (error) {
-    //         console.error('Error during Google OAuth signup:', error);
-           
-    //         res.status(500).json({ message: 'Server error' });
-    //     }
-    // });
- 
-
+app.get("/logout",(req,res,next)=>{
+    req.logout(function(err){
+        if(err){return next(err)}
+        localStorage.removeItem('googleId');
+        localStorage.removeItem('googleEmail');
+        localStorage.removeItem('googleUsername');
+        localStorage.removeItem('image');
+        res.redirect("http://localhost:3000");
+    })
+})
 
 app.listen(5004, () => {
     console.log("Server on port 5004 connected");

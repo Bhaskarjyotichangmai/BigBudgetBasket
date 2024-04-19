@@ -8,8 +8,8 @@ import { TextField,ThemeProvider, createTheme,Grid,Button,Typography,Box } from 
 import backgroundimg from '../Assets/backgroundimg.svg'
 import background from '../Dashboard/Components/Background'
 import Background from "../Dashboard/Components/Background";
-// import SigninButton from "../Dashboard/Components/SigninButton";
-import { signIn, signOut, useSession } from 'next-auth/react' 
+import { useSession, getSession } from 'next-auth/react';
+
 
 const theme = createTheme({
     palette: {
@@ -25,98 +25,7 @@ const theme = createTheme({
 
 export default function LoginPage() {
     const router = useRouter();
-    const { data: session } = useSession();
-    // if (session) {
-    //   // If user session exists, redirect to the dashboard
-    //   router.push('/Dashboard');
-    // }
-
-    const handleLogin = async (method:any) => {
-      try {
-          setLoading(true);
-          setEmailError('');
-          setPasswordError('');
-          setLoginMessage('');
-  
-          switch (method) {
-              case 'email':
-                  if (!user.email || !user.email.length) {
-                      setEmailError('Email is required');
-                      return;
-                  }
-                  if (!user.password || !user.password.length) {
-                      setPasswordError('Password is required');
-                      return;
-                  }
-                  
-                  const emailResponse = await axios.post('http://localhost:5004/api/login', {
-                      email: user.email,
-                      password: user.password,
-                  });
-                  
-                  if (emailResponse.status === 200 && emailResponse.data && emailResponse.data.msg === 'Login successful') {
-                      setLoginMessage("Logged in successfully!");
-                      localStorage.setItem("email", user.email);
-                      localStorage.setItem("password", user.password);
-                      localStorage.setItem("username", emailResponse.data.user.username);
-                      localStorage.setItem("token", emailResponse.data.token);
-                      router.push("/Dashboard");
-                  } else {
-                      toast.error("Invalid email or password");
-                      setLoginMessage("Incorrect email or password");
-                  }
-                  break;
-  
-              case 'google':
-                  const storedEmail = localStorage.getItem("email");
-                  const storedName = localStorage.getItem("name");
-                  const storedImage = localStorage.getItem("image");
-  
-                  await signIn('google', { callbackUrl: 'http://localhost:3000/Dashboard' });
-                  
-                  const googleResponse = await axios.post('http://localhost:5004/api/google-login', {
-                      email: storedEmail,
-                      name: storedName,
-                      image: storedImage,
-                  });
-  
-                  if (googleResponse.status === 200 && googleResponse.data && googleResponse.data.msg === 'Login successful') {
-                      setLoginMessage("Logged in with Google successfully!");
-                      localStorage.setItem("email", googleResponse.data.email);
-                      router.push("/Dashboard");
-                  } else {
-                      toast.error("Login with Google failed");
-                  }
-                  break;
-  
-              case 'mobile':
-                  // Your mobile login logic here
-                  console.log('Check OTP');
-                  break;
-  
-              default:
-                  break;
-          }
-      } catch (error) {
-          console.error('Login failed', error);
-          toast.error("Error logging in. Please try again.");
-          setLoginMessage("Error logging in. Please try again.");
-      } finally {
-          setLoading(false);
-      }
-  };
-    useEffect(() => {
-      // Check if user session exists
-      if (session?.user) {
-        const { email, name, image } = session.user;
-        localStorage.setItem("email", email ?? "");
-        localStorage.setItem("name", name ?? "");
-        localStorage.setItem("image", image ?? "");
-        router.push('/Dashboard');
-      }
-    }, [session]);
-  
-
+    
     const [emailError,setEmailError]=React.useState("");
     const [passwordError,setPasswordError]=React.useState("");
 
@@ -142,121 +51,102 @@ export default function LoginPage() {
         }
     }, []);
 
-    // const onLogin = async () => {
-    //   try {
-    //     setLoading(true);
+    const onLogin = async () => {
+      try {
+        setLoading(true);
     
         
-    //     setEmailError('');
-    //     setPasswordError('');
+        setEmailError('');
+        setPasswordError('');
     
        
-    //     if (!user.email || !user.email.length) {
-    //       setEmailError('Email is required');
-    //       return; 
-    //     }
-    //     if (!user.password || !user.password.length) {
-    //       setPasswordError('Password is required');
-    //       return; 
-    //     }
+        if (!user.email || !user.email.length) {
+          setEmailError('Email is required');
+          return; 
+        }
+        if (!user.password || !user.password.length) {
+          setPasswordError('Password is required');
+          return; 
+        }
     
         
-    //     const response = await axios.post('http://localhost:5004/api/login', {
-    //       email: user.email,
-    //       password: user.password,
-    //     });
+        const response = await axios.post('http://localhost:5004/api/login', {
+          email: user.email,
+          password: user.password,
+        });
     
         
-    //     if (response.status === 200 && response.data && response.data.msg === 'Login successful') {
-    //       console.log("Login success");
-    //       setLoginMessage("Logged in succesfully!");
-    //       toast.success("Login success");
+        if (response.status === 200 && response.data && response.data.msg === 'Login successful') {
+          console.log("Login success");
+          setLoginMessage("Logged in succesfully!");
+          toast.success("Login success");
 
-    //       localStorage.setItem("email", user.email);
-    //       localStorage.setItem("password", user.password);
-    //       localStorage.setItem("username", response.data.user.username);
-    //       localStorage.setItem("token", response.data.token);
-          
+          localStorage.setItem("email", user.email);
+          localStorage.setItem("password", user.password);
+          localStorage.setItem("username", response.data.user.username);
+          localStorage.setItem("token", response.data.token);
 
-    //       router.push("/Dashboard");
-    //     } else {
-    //       console.log("Invalid email or password");
-    //       toast.error("Invalid email or password");
-    //       setLoginMessage("Incorrect email or password");
-    //     }
-    //   } catch (error:any) {
-    //     console.log("Login failed", error);
-    //     toast.error("Login failed. Please try again.");
-    //     setLoginMessage("Error logging in. Please try again.");
-    //   } finally {
-    //     setLoading(false);
-    //   }
-    // }
+          router.push("/Dashboard");
+        } else {
+          console.log("Invalid email or password");
+          toast.error("Invalid email or password");
+          setLoginMessage("Incorrect email or password");
+        }
+      } catch (error:any) {
+        console.log("Login failed", error);
+        toast.error("Login failed. Please try again.");
+        setLoginMessage("Error logging in. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    }
     
     // const onLoginWithGoogle=async()=>{
-    //   try {
-    //     // const response = await axios.get("http://localhost:5004/auth/google/callback");   
-    //     // window.location.href = response.data.authUrl;
-    //     <SigninButton />
-    // } catch (error) {
-    //     console.error('Error logging in with Google:', error);
-    //     toast.error("Error logging in with Google. Please try again.");
+    //   const newWindow = window.open("http://localhost:5004/auth/google/callback","_self")
+    //       window.addEventListener('message', (event) => {
+    //     if (event.origin !== window.location.origin) return;
+        
+    //     const { googleEmail, googleUserName, image, googleId } = event.data;
+        
+    //     // Update localStorage
+    //     localStorage.setItem('googleEmail', googleEmail);
+    //     localStorage.setItem('googleUsername', googleUserName);
+    //     localStorage.setItem('image', image);
+    //     localStorage.setItem('googleId', googleId);
+        
+    //     // Close the popup window
+    //     newWindow?.close();
+    //     // Redirect or perform any other action
+    //     router.push('/Dashboard');
+    // }, false);
     // }
-    // }
-  //   const onLoginWithGoogle = async () => {
-  //     try {
-  //         // Initiate Google OAuth login using next-auth signIn function
-  //         await signIn('google', { callbackUrl: 'http://localhost:3000/Dashboard' });
-  //     } catch (error) {
-  //         console.error('Error logging in with Google:', error);
-  //         toast.error("Error logging in with Google. Please try again.");
-  //     }
-  // }
-
-  // const onLoginWithGoogle = async () => {
-  //   try {
-  //     const storedEmail = localStorage.getItem("email");
-  //   const storedName = localStorage.getItem("name");
-  //   const storedImage = localStorage.getItem("image");
-  //     // Initiate Google OAuth login using next-auth signIn function
-  //     await signIn('google', { callbackUrl: 'http://localhost:3000/Dashboard' });
-  //     // Send the session data to your backend API
-  //   const response = await axios.post('http://localhost:5004/api/google-login', {
-  //     email: storedEmail,
-  //     name: storedName,
-  //     image: storedImage,
-  //   });
-
-  //   if (response.status === 200 && response.data && response.data.msg === 'Login successful') {
-  //     console.log("Google Login success");
-  //     setLoginMessage("Logged in with Google successfully!");
-  //     toast.success("Login with Google success");
-
-  //     localStorage.setItem("token", response.data.token);
-  //   } else {
-  //     console.log("Google Login failed");
-  //     toast.error("Login with Google failed");
-  //   }
-  // } catch (error) {
-  //     console.error('Error logging in with Google:', error);
-  //     toast.error("Error logging in with Google. Please try again.");
-  //   }
-  // }
+    const onLoginWithGoogle = async () => {
+      const newWindow = window.open("http://localhost:5004/auth/google/callback", "_self");
+      
+      const handleEvent = async (event: MessageEvent) => {
+          if (event.origin !== window.location.origin) return;
   
-  //   const onLoginWithMobile=async()=>{
-  //       console.log('Check Otp');
-  //   }
-  const onLogin = () => {
-    handleLogin('email');
-};
-
-const onLoginWithGoogle = () => {
-    handleLogin('google');
-};
-
-const onLoginWithMobile = () => {
-    handleLogin('mobile');
-};
+          const { googleEmail, googleUserName, image, googleId } = event.data;
+  
+          // Update localStorage
+          localStorage.setItem('googleEmail', googleEmail);
+          localStorage.setItem('googleUsername', googleUserName);
+          localStorage.setItem('image', image);
+          localStorage.setItem('googleId', googleId);
+  
+          // Fetch updated session
+          const session = await getSession();
+          
+          // Redirect or perform any other action
+          router.push('/Dashboard');
+      };
+  
+      window.addEventListener('message', handleEvent, false);
+  }
+  
+    const onLoginWithMobile=async()=>{
+        console.log('Check Otp');
+    }
     const forgotPassword=async()=>{
         router.push("/ForgotPassword")
     }
@@ -363,7 +253,6 @@ const onLoginWithMobile = () => {
                 </Grid>
                 <Grid item xs={12}>
                   <Button
-                    // onClick={() => signIn('google')}
                     onClick={onLoginWithGoogle}
                     variant="contained"
                     color="primary"

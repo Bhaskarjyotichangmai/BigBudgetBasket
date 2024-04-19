@@ -4,12 +4,11 @@ import { TextField,InputAdornment, Box, Button, Select, MenuItem, FormControl, I
 import Image from 'next/image'
 import axios from 'axios'
 import Link from 'next/link'
-
-import search from '../../Assets/search.png'
 import Hero from './Hero'
+import search from '../../Assets/search.png'
 import image from '../../Assets/image.png'
 import imagee from '../../Assets/imagee.png'
-import { useState } from 'react'
+import { useState,useEffect } from 'react'
 import { unknown } from 'zod'
 import item1 from '../../Assets/image 3.png'
 import item2 from '../../Assets/image5.png'
@@ -32,7 +31,8 @@ import item18 from '../../Assets/image 30.png'
 import item19 from '../../Assets/image 31.png'
 import item20 from '../../Assets/image 32.png'
 import item21 from '../../Assets/image 33.png'
-import { basketItems } from '@/app/(Items)/Items'
+import { basketItems,sliderItems } from '@/app/(Items)/Items'
+import ImageSlider from './ImageSlider'
 
 export default function Dashboard() {
   function handleSearch() {
@@ -44,7 +44,7 @@ const [showCategories, setShowCategories] = useState(false);
 const handleCategoriesClick = () => {
   setShowCategories(!showCategories);
 };
-
+const [toggleCategories, setToggleCategories] = useState(false);
 const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
 const handleCategoryClick = (categoryName: string) => {
@@ -75,21 +75,33 @@ function handleQuantityChange(itemId: number, event: React.ChangeEvent<{ value: 
 }
 
 
- const categories = [
-  'Shop by category',
-  'Exotic fruits and vegetables',
-  'Nandini',
+ const topButtons = [
+  'Categories',
+  'Exotic fruits',
+  'Milk',
   'Ghee',
   'Meat',
   'Fish',
-  '>>'
+  'Eggs',
+  'Yogurt',
+  'Juice',
+  'Vegetables',
+  'Spices'
 ];
-
+const topButtonClick = () => {
+  setToggleCategories(!toggleCategories);
+};
 
  const items = [
   { id: 1, name: 'Item 1',  image:image,imagee:imagee},
 ];
+const [currentSlide, setCurrentSlide] = useState(0);
 
+
+
+const handleTopButtonHover = (index: number) => {
+  setCurrentSlide(index);
+};
 const popularItems=[
        { id:1,name:'Popularitem1',image:item5},
        { id:2,name:'Popularitem2',image:item6},
@@ -175,7 +187,6 @@ const handleAddToCart = async (itemId: number) => {
   }
 };
 
-
   return (
  <div>
     <div className='flex justify-end'>
@@ -205,11 +216,23 @@ const handleAddToCart = async (itemId: number) => {
                 />
         </div>
     </div>
-    <Box className="horizontal-boxes justify-center flex cursor-pointer">
-    {categories.map((category, index) => (
-                    <Box key={index} className="box">{category}</Box>
-                ))}
-            </Box>
+    <Box className="horizontal-boxes grid grid-flow-col justify-between gap-4 cursor-pointer overflow-x-scroll" style={{ marginLeft: '-10px', marginRight: '-10px' }}>
+    
+    {topButtons.map((category, index) => (
+          <Button 
+            key={index} 
+            className={`box ${category === '>>' ? 'small-button' :'regular-button'}`}
+            onMouseEnter={() => handleTopButtonHover(index)}
+            onMouseLeave={() => setCurrentSlide(0)}
+            onClick={category === 'Categories' ? handleCategoriesClick : () => handleCategoryClick(category)}
+          >
+            {category}
+          </Button>
+        ))}              
+      </Box>
+      
+        <ImageSlider currentSlide={currentSlide} onHoverSlideChange={handleTopButtonHover} />
+      
     <div className="item-cards-container flex">
                 {items.map(item => (
                     <div key={item.id} className='flex items-center'>

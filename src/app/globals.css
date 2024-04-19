@@ -35,22 +35,102 @@ border-radius: 50px;
 font-family: 'Poppins', sans-serif;
 }
 .horizontal-boxes {
-  display: flex;
-  overflow-x:visible;
+  display: grid;
+  overflow-x:scroll;
+  cursor: pointer;
+  justify-content:flex-start;
   font-family: 'Poppins', sans-serif;
   padding: 5px;
-  gap: 5px;
-  
+  gap: 5px;    
+  scrollbar-width: none; /* For Firefox */
+  -ms-overflow-style: none; /* For Internet Explorer and Edge */
+
+}
+.horizontal-boxes::-webkit-scrollbar {
+  display: none; /* For Chrome, Safari, and Opera */
 }
 
 .box {
-  flex: 1 1 auto;
-  background-color: #d17e25; 
+  background-color: rgba(255, 255, 255, 1);
   padding: 10px;
-  border-radius: 1px; 
+  border-radius: 10px; 
   font-family: 'Poppins', sans-serif;
   white-space: nowrap;
   overflow:hidden;
   text-overflow: ellipsis;
   font-size:1.5vw;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.25);
+  transition: background-color 0.3s ease;
+  color: black;
+  min-width: 6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
 }
+.small-button {
+  font-size: 2vw; 
+  padding: 8px 12px; 
+  height: 3rem;
+  width: 4rem;
+}
+.regular-button {
+  width: 8rem; 
+  height: 3rem; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2vw;
+}
+.grid-flow-col {
+  display: grid;
+  grid-auto-flow: column;
+  gap: 5px;
+}
+
+.box:hover {
+  background-color: rgba(190, 255, 197, 1); 
+}
+
+.grid-flow-col {
+  display: grid;
+  grid-auto-flow: column;
+  gap: 12px;
+}
+
+@media (min-width: 768px) {
+  .horizontal-boxes {
+    padding-left: 20px;
+    padding-right: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+    gap: 4rem;
+  }
+  .regular-button {
+    width: 12rem;
+    font-size:x-small;
+  }
+}
+
+
+
+  /* .slider-container {
+    display: flex;
+    overflow-x: hidden;
+    gap: 10px;
+    margin-top: 20px;
+    justify-content: flex-start;
+    transition: transform 0.8s ease;
+  }
+  
+  .slider-image {
+    object-fit:cover;
+    width: 100%;
+    height:auto;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    position: relative;
+  }
+  
+  .slider-image.active {
+    opacity: 1;
+  } */
