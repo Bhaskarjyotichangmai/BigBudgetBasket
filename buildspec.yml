@@ -3,15 +3,31 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      nodejs: 12
+      nodejs: 14
+    commands:
+      - npm install -g yarn
+      - yarn install --frozen-lockfile
+
   pre_build:
     commands:
-      - npm install
+      # Build React frontend
+      - cd frontend
+      - yarn build
+
   build:
     commands:
+      # Build Node.js backend
+      - cd ../backend
+      - npm install
       - npm run build
-  post_build:
-    commands:
-      
+
 artifacts:
-    files: imagedefinitions.json
+  files:
+    - frontend/build/**/*
+    - backend/dist/**/*
+    - backend/package.json
+    - backend/package-lock.json
+
+cache:
+  paths:
+    - node_modules/**/*
