@@ -6,7 +6,7 @@ phases:
       nodejs: 14
     commands:
       - npm install -g yarn
-      - yarn install --frozen-lockfile
+      - yarn install --frozen-lockfile --verbose
 
   pre_build:
     commands:
